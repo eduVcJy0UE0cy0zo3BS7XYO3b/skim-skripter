@@ -19,7 +19,9 @@
 ;;; Code:
 
 (library (dom media)
-  (export make-audio
+  (export load-font
+	  download-font!
+	  make-audio
           media-play
           media-pause
           media-volume
@@ -31,6 +33,12 @@
           (hoot match)
           (only (hoot syntax) define*))
 
+  (define-foreign load-font
+    "media" "load"
+    (ref null extern) -> (ref null extern))
+  (define-foreign download-font!
+    "media" "makeFont"
+    (ref string) (ref string) -> (ref null extern))
   (define-foreign make-audio
     "media" "newAudio"
     (ref string) -> (ref extern))

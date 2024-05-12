@@ -24,15 +24,24 @@
   #:use-module (hoot ffi)
   #:export (get-context
             set-fill-color!
+	    set-border-color!
             set-font!
+	    set-alpha!
             set-text-align!
             clear-rect
             fill-rect
             fill-text
+	    stroke-text
             draw-image
+	    draw-image-simple
             set-scale!
             set-transform!
-            set-image-smoothing-enabled!))
+            set-image-smoothing-enabled!
+	    measure-text
+	    set-shadow-blur!
+	    set-shadow-color!
+	    context-save!
+	    context-restore!))
 
 ;; HTMLCanvasElement
 (define-foreign get-context
@@ -43,9 +52,15 @@
 (define-foreign set-fill-color!
   "canvas" "setFillColor"
   (ref extern) (ref string) -> none)
+(define-foreign set-border-color!
+  "canvas" "setBorderColor"
+  (ref extern) (ref string) -> none)
 (define-foreign set-font!
   "canvas" "setFont"
   (ref extern) (ref string) -> none)
+(define-foreign set-alpha!
+  "canvas" "setAlpha"
+  (ref extern) f64 -> none)
 (define-foreign set-text-align!
   "canvas" "setTextAlign"
   (ref extern) (ref string) -> none)
@@ -58,6 +73,12 @@
 (define-foreign fill-text
   "canvas" "fillText"
   (ref extern) (ref string) f64 f64 -> none)
+(define-foreign stroke-text
+  "canvas" "strokeText"
+  (ref extern) (ref string) f64 f64 -> none)
+(define-foreign draw-image-simple
+  "canvas" "drawImage_simple"
+  (ref extern) (ref extern) f64 f64 -> none)
 (define-foreign draw-image
   "canvas" "drawImage"
   (ref extern) (ref extern) f64 f64 f64 f64 f64 f64 f64 f64 -> none)
@@ -70,3 +91,23 @@
 (define-foreign set-image-smoothing-enabled!
   "canvas" "setImageSmoothingEnabled"
   (ref extern) i32 -> none)
+
+(define-foreign measure-text
+  "canvas" "measureText"
+  (ref extern) (ref string) -> (ref extern))
+
+(define-foreign set-shadow-blur!
+  "canvas" "shadowBlur"
+  (ref extern) i32 -> (ref extern))
+
+(define-foreign set-shadow-color!
+  "canvas" "shadowColor"
+  (ref extern) (ref string) -> (ref extern))
+
+(define-foreign context-save!
+  "canvas" "save"
+  (ref extern) -> (ref extern))
+
+(define-foreign context-restore!
+  "canvas" "restore"
+  (ref extern) -> (ref extern))
