@@ -1,6 +1,5 @@
 modules = \
   modules/dom/canvas.scm \
-  modules/dom/console.scm \
   modules/dom/document.scm \
   modules/dom/element.scm \
   modules/dom/event.scm \

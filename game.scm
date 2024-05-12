@@ -32,7 +32,6 @@
         (dom image)
         (dom media)
         (dom window)
-	(dom console)
         (math)
         (math rect)
         (math vector))
