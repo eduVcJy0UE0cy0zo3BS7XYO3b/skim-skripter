@@ -1,0 +1,55 @@
+(define-module (ren-sexp text)
+  #:pure
+  #:use-module (scheme base)
+  #:use-module (scheme char)
+  #:use-module (dom element)
+  #:use-module (dom canvas)
+  #:use-module (ren-sexp utils)
+  #:use-module (ren-sexp scene)
+  #:export (next-string
+	    draw-text
+	    get-lines))
+
+(define (get-lines context text)
+  (if (string=? text "")
+      '("")
+      (let* ((words (string-split char-whitespace? text))
+	     (current-line (car words)))
+	(define (get-lines-iter lines words current-line)
+	  (if (null? words)
+	      (cons current-line lines)
+	      (let* ((word (car words))
+		     (rest-words (cdr words))
+		     (current-line* (string-append current-line " " word))
+		     (width (element-width (measure-text context current-line*))))
+		
+		(if (< width 1000)
+		    (get-lines-iter lines rest-words current-line*)
+		    (get-lines-iter (cons current-line lines) rest-words word)))))
+	
+	(reverse (get-lines-iter '() (cdr words) current-line)))))
+
+(define (next-string src dst)
+  (define dst-text (scene-text dst))
+  (define src-text (scene-text src))
+  (define pos (string-length dst-text))
+  (define next-pos (+ 1 pos))
+  (define text* (substring src-text 0 next-pos))
+  (scene-update-text dst text*))
+
+(define (draw-text text context)
+  (set-fill-color! context "#ffffff")
+  (set-border-color! context "black")
+  (set-font! context "bold 40px Prime")
+  (set-text-align! context "left")
+  (set-shadow-blur! context 4)
+  (set-shadow-color! context "rgba(0,0,0,0.3)")
+  
+  (define lines (get-lines context text))
+  (define (display-lines lines line-height)
+    (unless (null? lines)
+      (fill-text context (car lines) 470.0 line-height)
+      (stroke-text context (car lines) 470.0 line-height)
+      (display-lines (cdr lines) (+ line-height 50.0))))
+  
+  (display-lines lines 50.0))
