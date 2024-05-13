@@ -69,6 +69,7 @@ window.addEventListener("load", async () => {
 		shadowBlur: (ctx, blur_num) => ctx.shadowBlur = blur_num,
 		shadowColor: (ctx, color) => ctx.shadowColor = color,
 		setAlpha: (ctx, alpha) => ctx.globalAlpha = alpha,
+		setGlobalCompositeOperation: (ctx, operation) => ctx.globalCompositeOperation = operation,
 		setTextAlign: (ctx, align) => ctx.textAlign = align,
 		clearRect: (ctx, x, y, w, h) => ctx.clearRect(x, y, w, h),
 		fillRect: (ctx, x, y, w, h) => ctx.fillRect(x, y, w, h),

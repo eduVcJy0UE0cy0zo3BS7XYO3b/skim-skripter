@@ -41,7 +41,8 @@
 	    set-shadow-blur!
 	    set-shadow-color!
 	    context-save!
-	    context-restore!))
+	    context-restore!
+	    set-global-composite-operation!))
 
 ;; HTMLCanvasElement
 (define-foreign get-context
@@ -107,6 +108,10 @@
 (define-foreign context-save!
   "canvas" "save"
   (ref extern) -> (ref extern))
+
+(define-foreign set-global-composite-operation!
+  "canvas" "setGlobalCompositeOperation"
+  (ref extern) (ref string) -> (ref extern))
 
 (define-foreign context-restore!
   "canvas" "restore"

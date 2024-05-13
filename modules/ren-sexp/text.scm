@@ -42,7 +42,8 @@
   (set-border-color! context "black")
   (set-font! context "bold 40px Prime")
   (set-text-align! context "left")
-  (set-shadow-blur! context 4)
+  ;; (set-global-composite-operation! context "source-atop")
+  (set-shadow-blur! context 10)
   (set-shadow-color! context "rgba(0,0,0,0.3)")
   
   (define lines (get-lines context text))

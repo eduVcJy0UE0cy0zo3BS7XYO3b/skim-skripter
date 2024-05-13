@@ -6,9 +6,14 @@ modules = \
   modules/dom/image.scm \
   modules/dom/media.scm \
   modules/dom/window.scm \
-  modules/math.scm \
-  modules/math/rect.scm \
-  modules/math/vector.scm
+  modules/ren-sexp/bg.scm \
+  modules/ren-sexp/core.scm \
+  modules/ren-sexp/music.scm \
+  modules/ren-sexp/scene.scm \
+  modules/ren-sexp/sprites.scm \
+  modules/ren-sexp/text.scm \
+  modules/ren-sexp/utils.scm
+
 
 game.wasm: game.scm $(modules)
 	guild compile-wasm -L modules -o $@ $<

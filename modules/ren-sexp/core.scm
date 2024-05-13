@@ -7,6 +7,7 @@
   #:use-module (dom window)
   #:use-module (dom event)
   #:use-module (dom element)
+  #:use-module (dom media)
   #:use-module (ren-sexp text)
   #:use-module (ren-sexp bg)
   #:use-module (ren-sexp sprites)
@@ -71,8 +72,6 @@
       (define next-scene1 (include-bg init-scene curr-bg next-bg))      
       (define next-scene2 (include-sprites next-scene1 curr-sprites next-sprites))
       (define next-scene3 (include-music next-scene2 curr-music next-music))
-
-      (pk next-scene3)
       (append state (list next-scene3)))))
 
 (define (complete-current-scene! local remote state)
@@ -80,8 +79,12 @@
 
 (define (init data init-scene)
   (define *state* (make-parameter (list init-scene)))
-  (define canvas (get-element-by-id "canvas"))
+  (define canvas (get-element-by-id "all-canvas"))
   (define context (get-context canvas "2d"))
+
+  (define text-canvas (get-element-by-id "text-canvas"))
+  (define text-context (get-context text-canvas "2d"))
+
   (define game-width    1920.0)
   (define game-height   1080.0)
   (define key:space "Space")
@@ -93,13 +96,11 @@
     (let ((text (scene-text scene))
           (bg (scene-bg scene))
 	  (sprites (scene-sprites scene)))
-
-      (set-fill-color! context "#140c1c")
-      (fill-rect context 0.0 0.0 game-width game-height)
-
+      
       (draw-bg bg context game-width game-height)
       (draw-sprites sprites context)
-      (draw-text text context))
+      (clear-rect text-context 0.0 0.0 game-width game-height)
+      (draw-text text text-context))
     
     (request-animation-frame draw-callback))
   (define draw-callback (procedure->external draw))
@@ -132,22 +133,21 @@
   
   (set-element-width! canvas (exact game-width))
   (set-element-height! canvas (exact game-height))
+
+  (set-element-width! text-canvas (exact game-width))
+  (set-element-height! text-canvas (exact game-height))
+
+  (define Prime (download-font!
+		 "Prime"
+		 "url(resources/fonts/courierprime.otf/courier-prime.otf)"))
+
   (add-event-listener! (current-document) "keyup"
                        (procedure->external (on-key-up data)))
+
+  (define (init-call font)
+    (add-font! font)
+    (request-animation-frame draw-callback)
+    (timeout update-callback dt))
   
-  (request-animation-frame draw-callback)
-  (timeout update-callback dt))
-
-;; Canvas and event loop setup
-;; (define Prime (download-font!
-;; 	       "Prime"
-;; 	       "url(/resources/fonts/courierprime.otf/courier-prime.otf)"))
-
-
-;; (define (init-call font)
-;;   (add-font! font)
-;;   (request-animation-frame draw-callback)
-;;   (timeout update-callback dt))
-
-;; (then (load-font Prime)
-;;       (procedure->external init-call))
+  (then (load-font Prime)
+	(procedure->external init-call)))

@@ -6,6 +6,7 @@
   #:use-module (dom canvas)
   #:use-module (ice-9 match)
   #:use-module (ren-sexp utils)
+  #:use-module (hoot debug)
   #:use-module (ren-sexp scene)
   #:export (<sprite>
 	    make-sprite
@@ -76,7 +77,6 @@
     (($ <sprite> img alpha pos character mood)
      (context-save! context)
      (set-alpha! context (/ alpha 1000.0))
-     
      (define pos* (position->point pos))
      (define dx (car pos*))
      (define dy (cdr pos*))       
@@ -94,8 +94,8 @@
 
 (define (position->point position)
   (match position
-    ('left (cons 200.0 100.0))
-    ('right (cons 1200.0 100.0))))
+    ('left (cons 200 100))
+    ('right (cons 1200 100))))
 
 (define (get-same-sprites curr-sprites next-sprites)
   (define (%get-same-sprites curr-sprites result)
