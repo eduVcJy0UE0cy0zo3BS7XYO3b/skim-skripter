@@ -38,7 +38,9 @@
 (define (sprite-in-scene? src-sprite dst-sprites)
   (define src-character (sprite-character src-sprite))
   (define all-chars (characters-in-scene dst-sprites))
-  (member src-character all-chars))
+  (if (member src-character all-chars)
+      (car (member src-character all-chars))
+      (member src-character all-chars)))
 
 (define (update-sprite-alpha sprite alpha*)
   (match sprite
@@ -101,9 +103,11 @@
   (define (%get-same-sprites curr-sprites result)
     (if (null? curr-sprites)
 	result
-	(let ((curr-sprite (car curr-sprites)))
-	  (if (sprite-in-scene? curr-sprite next-sprites)
-	      (%get-same-sprites (cdr curr-sprites) (cons curr-sprite result))
+	(let* ((curr-sprite (car curr-sprites))
+	       (next-sprite-name (sprite-in-scene? curr-sprite next-sprites)))
+	  (pk next-sprite-name)
+	  (if next-sprite-name
+	      (%get-same-sprites (cdr curr-sprites) (cons (get-sprite-by-name next-sprite-name next-sprites) result))
 	      (%get-same-sprites (cdr curr-sprites) result)))))
   (%get-same-sprites curr-sprites '()))
 
