@@ -1,0 +1,24 @@
+#+title: Ren Sexp is a visual novel engine on Guile Hoot
+
+* Building
+#+begin_src shell
+  guix shell guile-next -f guix.scm
+#+end_src
+
+* Check if installation is completed
+#+begin_src shell
+  $ guile
+
+  ,use (hoot compile)
+#+end_src
+
+* Running
+#+begin_src shell
+  make serve
+#+end_src
+
+* Concept
+Game consist of list scenes.
+All scenes in self-descriptive -- there is not something that scenes depends on each of others.
+
+And there is not graphs i.e. choices that can push labels on top of game stack, only linear, kinetic, narratives are supported.
