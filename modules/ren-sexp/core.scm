@@ -88,6 +88,7 @@
   (define game-width    1920.0)
   (define game-height   1080.0)
   (define key:space "Space")
+  (define key:mute-toggle "KeyM")
 
   (define dt (/ 1000.0 60.0))
 
@@ -113,9 +114,12 @@
 	     (local&current (local-and-remote-scene state data))
 	     (local (car local&current))
 	     (remote (cdr local&current)))
-	
+	(pk key)
 	(match (scene-state scene)
 	  ('play
+	   (when (equal? key key:mute-toggle)
+	     (pk 'music-toggle)
+	     (mute-toggle scene))
 	   (when (equal? key key:space)
 	     (*state* (if (current-scene-completed? local remote)
 			  (append-empty-scene! state data init-scene)

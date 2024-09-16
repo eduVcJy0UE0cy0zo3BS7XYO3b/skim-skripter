@@ -13,7 +13,7 @@
 	    music?
 	    music-audio
 	    music-volume
-
+	    mute-toggle
 	    include-music))
 
 (define-record-type <music>
@@ -48,6 +48,14 @@
   (define src-music (scene-music src))
   (define music* (inc-volume src-music dst-music))
   (scene-update-music dst music*))
+
+(define (mute-toggle scene)
+  (define curr-audio (music-audio (scene-music scene)))
+  (set-media-volume! curr-audio
+		     (if (equal? (media-volume curr-audio) 0.0)
+			 1.0
+			 0.0)))
+  
 
 (define (include-music next-scene curr-music next-music)
   (cond
