@@ -9,6 +9,10 @@ window.addEventListener("load", async () => {
 		    requestAnimationFrame: (f) => window.requestAnimationFrame(f),
 		    setTimeout: (f, delay) => window.setTimeout(f, delay)
 		},
+		storage: {
+		    setItem: (key, value) => localStorage.setItem(key, value),
+		    getItem: (key) => localStorage.getItem(key)
+		},
 		console: {
 		    log: (string) => console.log(string),
 		    split: (string, delim) => string.split(delim),

@@ -4,6 +4,7 @@
   #:use-module (scheme char)
   #:use-module (dom element)
   #:use-module (dom media)
+  #:use-module (dom storage)
   #:use-module (ice-9 match)
   #:use-module (ren-sexp utils)
   #:use-module (ren-sexp scene)
@@ -14,6 +15,7 @@
 	    music-audio
 	    music-volume
 	    mute-toggle
+	    change-volume
 	    include-music))
 
 (define-record-type <music>
@@ -55,7 +57,24 @@
 		     (if (equal? (media-volume curr-audio) 0.0)
 			 1.0
 			 0.0)))
-  
+
+(define (change-volume scene amount)
+  (define curr-audio (music-audio (scene-music scene)))
+  (define curr-volume (media-volume curr-audio))
+  (define volume* (+ curr-volume amount))
+  (pk curr-volume)
+  (when (and (> volume* 0)
+	     (< volume* 1))
+    (set-media-volume! curr-audio volume*)
+    (set-item! "volume" (number->string volume*))))
+
+(define (settings-get variable)
+  (get-item variable))
+
+(define (set-current-volume audio)
+  (let ((volume (string->number (settings-get "volume"))))
+    (set-media-volume! audio volume)
+    audio))
 
 (define (include-music next-scene curr-music next-music)
   (cond
@@ -87,6 +106,6 @@
    
    ((and (music? next-music) (not curr-music))
     (pk 5)
-    (media-play (music-audio next-music))
+    (media-play (set-current-volume (music-audio next-music)))
     (set-media-loop! (music-audio next-music) 1)
     (scene-update-music next-scene next-music))))

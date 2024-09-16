@@ -8,6 +8,7 @@
   #:use-module (dom event)
   #:use-module (dom element)
   #:use-module (dom media)
+  #:use-module (dom storage)
   #:use-module (ren-sexp text)
   #:use-module (ren-sexp bg)
   #:use-module (ren-sexp sprites)
@@ -77,7 +78,12 @@
 (define (complete-current-scene! local remote state)
   (find-replace local remote state))
 
+(define (init-settings!)
+  (let ((volume (get-item "volume")))
+    (or volume (set-item! "volume" "1.0"))))
+
 (define (init data init-scene)
+  (init-settings!)
   (define *state* (make-parameter (list init-scene)))
   (define canvas (get-element-by-id "all-canvas"))
   (define context (get-context canvas "2d"))
@@ -89,6 +95,8 @@
   (define game-height   1080.0)
   (define key:space "Space")
   (define key:mute-toggle "KeyM")
+  (define key:decrease-volume "Minus")
+  (define key:increase-volume "Equal")
 
   (define dt (/ 1000.0 60.0))
 
@@ -117,6 +125,12 @@
 	(pk key)
 	(match (scene-state scene)
 	  ('play
+	   (when (equal? key key:increase-volume)
+	     (pk 'decrease-volume)
+	     (change-volume scene 0.05))
+	   (when (equal? key key:decrease-volume)
+	     (pk 'decrease-volume)
+	     (change-volume scene -0.05))
 	   (when (equal? key key:mute-toggle)
 	     (pk 'music-toggle)
 	     (mute-toggle scene))
