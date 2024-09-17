@@ -4,6 +4,8 @@
   #:use-module (scheme char)
   #:use-module (dom element)
   #:use-module (dom canvas)
+  #:use-module (hoot strings)
+  #:use-module (hoot debug)
   #:use-module (ren-sexp utils)
   #:use-module (ren-sexp scene)
   #:export (next-string
@@ -37,20 +39,34 @@
   (define text* (substring src-text 0 next-pos))
   (scene-update-text dst text*))
 
-(define (draw-text text context)
+(define (draw-old lines context line-height)
+  (unless (null? lines)
+    (let ((current-line (car lines))
+	  (rest-lines (cdr lines)))
+      
+      (fill-text context current-line 470.0 line-height)
+      (stroke-text context current-line 470.0 line-height)
+      (draw-old rest-lines context (+ line-height 50.0)))))
+
+(define (draw-text text context game-width game-height)
   (set-fill-color! context "#ffffff")
   (set-border-color! context "black")
   (set-font! context "bold 40px Prime")
   (set-text-align! context "left")
-  ;; (set-global-composite-operation! context "source-atop")
   (set-shadow-blur! context 10)
   (set-shadow-color! context "rgba(0,0,0,0.3)")
+
   
   (define lines (get-lines context text))
-  (define (display-lines lines line-height)
+  (define (display-lines lines line-height old-lines)
     (unless (null? lines)
-      (fill-text context (car lines) 470.0 line-height)
-      (stroke-text context (car lines) 470.0 line-height)
-      (display-lines (cdr lines) (+ line-height 50.0))))
+      (let ((current-line (car lines))
+	    (rest-lines (cdr lines)))
+	(clear-rect context 0.0 0.0 game-width game-height)
+	(draw-old old-lines context 50.0)
+	(fill-text context (string-append current-line " ▷") 470.0 line-height)
+	(stroke-text context current-line 470.0 line-height)
+
+	(display-lines rest-lines (+ line-height 50.0) (cons current-line old-lines)))))
   
-  (display-lines lines 50.0))
+  (display-lines lines 50.0 '()))
