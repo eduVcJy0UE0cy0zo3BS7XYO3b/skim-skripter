@@ -53,10 +53,15 @@
 
 (define (mute-toggle scene)
   (define curr-audio (music-audio (scene-music scene)))
-  (set-media-volume! curr-audio
-		     (if (equal? (media-volume curr-audio) 0.0)
-			 1.0
-			 0.0)))
+  (define curr-volume (string->number (settings-get "volume")))
+  (define is-mute (equal? (settings-get "is-mute") "#t"))
+  (if is-mute
+      (begin
+	(set-media-volume! curr-audio curr-volume)
+	(set-item! "is-mute" "#f"))
+      (begin
+	(set-media-volume! curr-audio 0.0)
+	(set-item! "is-mute" "#t"))))
 
 (define (change-volume scene amount)
   (define curr-audio (music-audio (scene-music scene)))
@@ -73,7 +78,12 @@
 
 (define (set-current-volume audio)
   (let ((volume (string->number (settings-get "volume"))))
-    (set-media-volume! audio volume)
+    (define is-mute (equal? (settings-get "is-mute") "#t"))
+    (set-media-volume!
+     audio
+     (if is-mute
+         0.0
+	 volume))
     audio))
 
 (define (include-music next-scene curr-music next-music)

@@ -79,8 +79,10 @@
   (find-replace local remote state))
 
 (define (init-settings!)
-  (let ((volume (get-item "volume")))
-    (or volume (set-item! "volume" "1.0"))))
+  (let ((volume (get-item "volume"))
+	(is-mute (get-item "is-mute")))
+    (or volume (set-item! "volume" "1.0"))
+    (or is-mute (set-item! "is-mute" "#f"))))
 
 (define (init data init-scene)
   (init-settings!)
@@ -109,7 +111,7 @@
       (draw-bg bg context game-width game-height)
       (draw-sprites sprites context)
       (clear-rect text-context 0.0 0.0 game-width game-height)
-      (draw-text text text-context))
+      (draw-text text text-context game-width game-height))
     
     (request-animation-frame draw-callback))
   (define draw-callback (procedure->external draw))
