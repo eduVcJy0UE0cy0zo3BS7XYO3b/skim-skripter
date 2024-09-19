@@ -12,6 +12,7 @@ modules = \
   modules/ren-sexp/scene.scm \
   modules/ren-sexp/sprites.scm \
   modules/ren-sexp/text.scm \
+  modules/ren-sexp/carret.scm \
   modules/ren-sexp/utils.scm
 
 

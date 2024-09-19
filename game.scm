@@ -49,10 +49,10 @@
   (%make-bg image:white 0))
 
 (define (empty-scene)
-  (make-scene 'play (%make-bg image:black 0) "" (list) #f))
+  (make-scene 'play (%make-bg image:black 0) "" (list) #f ""))
 
 (define (%empty-scene)
-  (make-scene 'play black-screen "Hello and Welcome to this new super visual novel engine!  Press <SPACE> to launch the game." (list) #f))
+  (make-scene 'play black-screen "Hello and Welcome to this new super visual novel engine!  Press <SPACE> to launch the game." (list) #f ""))
 
 ;; Assets
 (define image:kitchen
@@ -127,14 +127,16 @@
 	      bg:kitchen
 	      text
 	      chars
-	      music:curious_critters))
+	      music:curious_critters
+	      ""))
 
 (define END
   (make-scene 'play
 	      (make-bg image:end)
 	      ""
 	      (list)
-	      #f))
+	      #f
+	      ""))
 
 (define EMPTY-SCENE (empty-scene))
 (define BEGIN (%empty-scene))

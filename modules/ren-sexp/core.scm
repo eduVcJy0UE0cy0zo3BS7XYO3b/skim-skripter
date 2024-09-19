@@ -14,6 +14,7 @@
   #:use-module (ren-sexp sprites)
   #:use-module (ren-sexp scene)
   #:use-module (ren-sexp music)
+  #:use-module (ren-sexp carret)
   #:use-module (hoot debug)
   #:use-module (hoot ffi)
   #:use-module (ren-sexp utils)
@@ -127,8 +128,10 @@
       (draw-sprites sprites context)
       (clear-rect text-context 0.0 0.0 game-width game-height)
       (clear-rect cursor-context 0.0 0.0 game-width game-height)
-      (draw-text text text-context game-width game-height completed?
-		 cursor-context cursor-height cursor-width))
+      (let* ((p&w (draw-text text text-context game-width game-height))
+	     (p (car p&w))
+	     (w (cdr p&w)))
+        (draw-carret (make-carret "") cursor-context p w completed?)))
     
     (request-animation-frame draw-callback))
   (define draw-callback (procedure->external draw))
