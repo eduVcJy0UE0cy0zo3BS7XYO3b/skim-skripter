@@ -2,6 +2,7 @@
   #:use-module (scheme char)
   #:use-module (dom element)
   #:use-module (dom canvas)
+  #:use-module (dom document)
   #:use-module (hoot strings)
   #:use-module (hoot debug)
   #:use-module (ice-9 match)
@@ -47,30 +48,35 @@
       (stroke-text context current-line 470.0 padding-top)
       (draw-old rest-lines context (+ padding-top 50.0)))))
 
-(define (draw-text text context game-width game-height completed?)
-  (set-fill-color! context "#ffffff")
-  (set-border-color! context "black")
-  (set-font! context "bold 40px Prime")
-  (set-text-align! context "left")
-  (set-shadow-blur! context 10)
-  (set-shadow-color! context "rgba(0,0,0,0.3)")
+(define (even? number)
+  (equal? (remainder number 2) 0))
 
-  
+(define (draw-text text context game-width game-height completed? cc
+		   cursor-width cursor-height)
   (define lines (get-lines context text))
-
   (define (display-lines lines padding-top old-lines)
     (match lines
       ((current-line rest-lines ...)
-       (clear-rect context 0.0 0.0 game-width game-height)
-       (draw-old (reverse old-lines) context 50.0)
-       (fill-text context
-		  (string-append current-line (if completed? " ▢" " ▷"))
-		  470.0 padding-top)
-       (stroke-text context current-line 470.0 padding-top)
-       
-       (display-lines rest-lines
-		      (+ 50.0 padding-top)
-		      (cons current-line old-lines)))
+       (unless (equal? "" current-line)
+	 (clear-rect context 0.0 0.0 game-width game-height)
+	 (clear-rect cc 0.0 0.0 game-width game-height)
+	 (draw-old (reverse old-lines) context 50.0)
+	 (define text-width
+	   (element-width (measure-text context current-line)))
+	 (fill-text context
+		    current-line
+		    470.0 padding-top)
+	 
+	 (fill-text cc
+		    (if completed?
+			(if (even? (current-second)) "▢" "")
+			"▷")
+		    (+ 470 20 text-width) padding-top)
+	 (stroke-text context current-line 470.0 padding-top)
+	 
+	 (display-lines rest-lines
+			(+ 50.0 padding-top)
+			(cons current-line old-lines))))
       (() #t)))
   
   (display-lines lines 50.0 '()))

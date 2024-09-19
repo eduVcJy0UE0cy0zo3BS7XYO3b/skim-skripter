@@ -20,6 +20,9 @@ canvas {
 }
 
 #text-canvas {
-    position: relative;
     z-index: 2;
+}
+
+#cursor-canvas {
+    z-index: 3;
 }

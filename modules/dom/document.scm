@@ -27,7 +27,12 @@
             get-element-by-id
             make-text-node
             make-element
+	    current-second
 	    add-font!))
+
+(define-foreign current-second
+  "document" "current_second"
+  -> i32)
 
 (define-foreign current-document
   "document" "get"

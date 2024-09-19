@@ -93,6 +93,13 @@
 (define (init data init-scene)
   (init-settings!)
   (define *state* (make-parameter (list init-scene)))
+  (define cursor-canvas (get-element-by-id "cursor-canvas"))
+  (define cursor-context (get-context cursor-canvas "2d"))
+  (define cursor-width    1920.0)
+  (define cursor-height   1080.0)
+  (set-element-width! cursor-canvas (exact cursor-width))
+  (set-element-height! cursor-canvas (exact cursor-height))
+  
   (define canvas (get-element-by-id "all-canvas"))
   (define context (get-context canvas "2d"))
 
@@ -119,11 +126,13 @@
       (draw-bg bg context game-width game-height)
       (draw-sprites sprites context)
       (clear-rect text-context 0.0 0.0 game-width game-height)
-      (draw-text text text-context game-width game-height completed?))
+      (clear-rect cursor-context 0.0 0.0 game-width game-height)
+      (draw-text text text-context game-width game-height completed?
+		 cursor-context cursor-height cursor-width))
     
     (request-animation-frame draw-callback))
   (define draw-callback (procedure->external draw))
-
+  
   (define (on-key-up data)
     (lambda (event)
       (let* ((key (keyboard-event-code event))
@@ -149,7 +158,7 @@
 			  (append-empty-scene! state data init-scene)
 			  (complete-current-scene! local remote state)))))
 	  (_ #t)))))
-
+  
   (define (update)
     (define state (*state*))
     (define scene (last (*state*)))
@@ -175,7 +184,20 @@
   (define (init-call font)
     (add-font! font)
     (request-animation-frame draw-callback)
-    (timeout update-callback dt))
+    (timeout update-callback dt)
+    (set-fill-color! text-context "#ffffff")
+    (set-border-color! text-context "black")
+    (set-font! text-context "bold 40px Prime")
+    (set-text-align! text-context "left")
+    (set-shadow-blur! text-context 10)
+    (set-shadow-color! text-context "rgba(0,0,0,0.3)")
+
+    (set-fill-color! cursor-context "#ffffff")
+    (set-border-color! cursor-context "black")
+    (set-font! cursor-context "bold 40px Prime")
+    (set-text-align! cursor-context "left")
+    (set-shadow-blur! cursor-context 10)
+    (set-shadow-color! cursor-context "rgba(0,0,0,0.3)"))
   
   (then (load-font Prime)
 	(procedure->external init-call)))

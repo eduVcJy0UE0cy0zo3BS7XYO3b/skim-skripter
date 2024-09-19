@@ -18,6 +18,7 @@ window.addEventListener("load", async () => {
 		    split: (string, delim) => string.split(delim),
 		},
 		document: {
+		    current_second() { return Math.floor(Date.now() / 1000); },
 		    get: () => document,
 		    body: () => document.body,
 		    getElementById: (id) => document.getElementById(id),
