@@ -45,7 +45,13 @@
   (define local* (next-scene-increment remote local))
   (define state* (find-replace local local* state))
   state*)
-  
+
+(define (current-state-completed? state data)
+  (let* ((local&current (local-and-remote-scene state data))
+	 (local (car local&current))
+	 (remote (cdr local&current)))
+    (current-scene-completed? local remote)))
+
 (define (compute-next-state state data)
   (let* ((local&current (local-and-remote-scene state data))
 	 (local (car local&current))
@@ -103,15 +109,17 @@
   (define dt (/ 1000.0 60.0))
 
   (define (draw prev-time)
-    (define scene (last (*state*)))
+    (define current-state (*state*))
+    (define scene (last current-state))
     (let ((text (scene-text scene))
           (bg (scene-bg scene))
-	  (sprites (scene-sprites scene)))
+	  (sprites (scene-sprites scene))
+	  (completed? (current-state-completed? current-state data)))
       
       (draw-bg bg context game-width game-height)
       (draw-sprites sprites context)
       (clear-rect text-context 0.0 0.0 game-width game-height)
-      (draw-text text text-context game-width game-height))
+      (draw-text text text-context game-width game-height completed?))
     
     (request-animation-frame draw-callback))
   (define draw-callback (procedure->external draw))
