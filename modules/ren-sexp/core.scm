@@ -8,6 +8,7 @@
   #:use-module (dom event)
   #:use-module (dom element)
   #:use-module (dom media)
+  #:use-module (dom image)
   #:use-module (dom storage)
   #:use-module (ren-sexp text)
   #:use-module (ren-sexp bg)
@@ -20,6 +21,7 @@
   #:use-module (ren-sexp utils)
   #:export (next-scene-increment
 	    compute-next-state
+	    black-screen
 	    local-and-remote-scene
 	    current-scene-completed?
 	    append-empty-scene!
@@ -61,7 +63,7 @@
 	state
 	(get-next-increment local remote state))))
 
-(define (append-empty-scene! state data init-scene)
+(define (append-empty-scene! state data empty-scene)
   (unless (eq? (length state)
 	       (length data))
     (let* ((curr-scene (last state))
@@ -77,7 +79,7 @@
 	   (curr-music (scene-music curr-scene))
 	   (next-music (scene-music next-scene)))
       
-      (define next-scene1 (include-bg init-scene curr-bg next-bg))      
+      (define next-scene1 (include-bg empty-scene curr-bg next-bg))
       (define next-scene2 (include-sprites next-scene1 curr-sprites next-sprites))
       (define next-scene3 (include-music next-scene2 curr-music next-music))
       (append state (list next-scene3)))))
@@ -91,9 +93,20 @@
     (or volume (set-item! "volume" "1.0"))
     (or is-mute (set-item! "is-mute" "#f"))))
 
-(define (init data init-scene)
+;; (define (image:black)
+;;   (make-image "resources/bg/black.png"))
+
+(define (black-screen)
+  (%make-bg (make-image "resources/bg/black.png") 1000))
+
+(define (empty-scene1)
+  (make-scene 'play (%make-bg (make-image "resources/bg/black.png") 0)
+	      "" (list) #f ""))
+
+(define (init data)
+  (define empty-scene (empty-scene1))
   (init-settings!)
-  (define *state* (make-parameter (list init-scene)))
+  (define *state* (make-parameter (list empty-scene)))
   (define cursor-canvas (get-element-by-id "cursor-canvas"))
   (define cursor-context (get-context cursor-canvas "2d"))
   (define cursor-width    1920.0)
@@ -131,7 +144,8 @@
       (let* ((p&w (draw-text text text-context game-width game-height))
 	     (p (car p&w))
 	     (w (cdr p&w)))
-        (draw-carret (make-carret "") cursor-context p w completed?)))
+	(unless (equal? text "")
+         (draw-carret (make-carret "") cursor-context p w completed?))))
     
     (request-animation-frame draw-callback))
   (define draw-callback (procedure->external draw))
@@ -148,17 +162,15 @@
 	(match (scene-state scene)
 	  ('play
 	   (when (equal? key key:increase-volume)
-	     (pk 'decrease-volume)
 	     (change-volume scene 0.05))
 	   (when (equal? key key:decrease-volume)
-	     (pk 'decrease-volume)
 	     (change-volume scene -0.05))
 	   (when (equal? key key:mute-toggle)
 	     (pk 'music-toggle)
 	     (mute-toggle scene))
 	   (when (equal? key key:space)
 	     (*state* (if (current-scene-completed? local remote)
-			  (append-empty-scene! state data init-scene)
+			  (append-empty-scene! state data empty-scene)
 			  (complete-current-scene! local remote state)))))
 	  (_ #t)))))
   

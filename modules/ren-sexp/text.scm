@@ -44,19 +44,18 @@
   (define (display-lines lines padding-top old-lines)
     (match lines
       ((current-line rest-lines ...)
-       (unless (equal? "" current-line)
-	 (fill-text context current-line 470.0 padding-top)
-	 (stroke-text context current-line 470.0 padding-top)
-	 (display-lines rest-lines
-			(+ 50.0 padding-top)
-			(cons current-line old-lines))))
+       (fill-text context current-line 470.0 padding-top)
+       (stroke-text context current-line 470.0 padding-top)
+       (display-lines rest-lines
+		      (+ 50.0 padding-top)
+		      (cons current-line old-lines)))
       (()
        (if (null? old-lines)
 	   (cons padding-top 0)
 	   (let* ((last-line (car old-lines))
 		  (text-width (element-width (measure-text context last-line))))
 	     (cons padding-top text-width))))))
-
+  
   (let ((ans (display-lines lines 50.0 '())))
     (if (unspecified? ans)
 	(cons 50 0)

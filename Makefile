@@ -13,11 +13,12 @@ modules = \
   modules/ren-sexp/sprites.scm \
   modules/ren-sexp/text.scm \
   modules/ren-sexp/carret.scm \
+  demo/assets.scm \
   modules/ren-sexp/utils.scm
 
 
 game.wasm: game.scm $(modules)
-	guild compile-wasm -L modules -o $@ $<
+	guild compile-wasm -L modules -L . -o $@ $<
 
 serve: game.wasm
 	guix shell python -- python3 -m http.server
