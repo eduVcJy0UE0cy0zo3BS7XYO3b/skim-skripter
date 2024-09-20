@@ -7,7 +7,9 @@
 	(ren-sexp core))
 
 (define (welcome-scene)
-  (make-scene 'play (black-screen) "Hello and Welcome to this new super visual novel engine!  Press <SPACE> to launch the game." (list) #f ""))
+  (make-scene
+   #:bg (black-screen)
+   #:text "Hello and Welcome to this new super visual novel engine!  Press <SPACE> to launch the game."))
 
 (define music:curious_critters
   (make-music (audio:curious_critters) 100))
@@ -33,10 +35,13 @@
 (define bg:kitchen (%make-bg (image:kitchen) 1000))
 
 (define (chat-in-kitchen text chars)
-  (make-scene 'play bg:kitchen text chars music:curious_critters ""))
+  (make-scene #:bg bg:kitchen
+	      #:music music:curious_critters
+	      #:text text
+	      #:sprites chars))
 
 (define END
-  (make-scene 'play (make-bg (image:end)) "" (list) #f ""))
+  (make-scene #:bg (make-bg (image:end))))
 
 (define script
   (list

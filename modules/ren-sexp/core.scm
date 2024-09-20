@@ -93,18 +93,15 @@
     (or volume (set-item! "volume" "1.0"))
     (or is-mute (set-item! "is-mute" "#f"))))
 
-;; (define (image:black)
-;;   (make-image "resources/bg/black.png"))
-
 (define (black-screen)
   (%make-bg (make-image "resources/bg/black.png") 1000))
 
-(define (empty-scene1)
-  (make-scene 'play (%make-bg (make-image "resources/bg/black.png") 0)
-	      "" (list) #f ""))
+(define (empty-scene_)
+  (make-scene
+   #:bg (%make-bg (make-image "resources/bg/black.png") 0)))
 
 (define (init data)
-  (define empty-scene (empty-scene1))
+  (define empty-scene (empty-scene_))
   (init-settings!)
   (define *state* (make-parameter (list empty-scene)))
   (define cursor-canvas (get-element-by-id "cursor-canvas"))
