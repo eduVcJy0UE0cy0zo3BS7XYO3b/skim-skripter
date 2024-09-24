@@ -145,10 +145,11 @@
     (match (scene-state scene)
       ('play (*state* (compute-next-state state data)))
       (_ #t))
-    (define update-callback-
-      (procedure->external update))
-    (timeout update-callback- dt))
-  update)
+    
+    (timeout update-callback dt))
+  (define update-callback
+    (procedure->external update))
+  update-callback)
 
 (define (init-draw data)
   (define carret-context (make-2d-context "carret-canvas"))
@@ -178,10 +179,9 @@
 	(unless (equal? text "")
           (draw-carret (make-carret "")
 		       carret-context p w completed?))))
-
-    (define draw-callback- (procedure->external draw))
-    (request-animation-frame draw-callback-))
-  draw)
+    (request-animation-frame draw-callback))
+  (define draw-callback (procedure->external draw))
+  draw-callback)
 
 (define (make-2d-context elem)
   (define canvas (get-element-by-id elem))
@@ -200,32 +200,29 @@
   (set-shadow-blur! context 10)
   (set-shadow-color! context "rgba(0,0,0,0.3)"))
 
-(define (init data)
-  (init-settings!)
-  (*state* (list (empty-scene)))
-  (define font-prime
-    (download-font!
-     "Prime"
-     "url(resources/fonts/courierprime.otf/courier-prime.otf)"))
-
+(define (add-key-up-listener! data)
   (add-event-listener!
    (current-document)
    "keyup"
    (procedure->external
-    (init-keyboard data)))
+    (init-keyboard data))))
+
+(define (prime-font)
+  (download-font!
+   "Prime"
+   "url(resources/fonts/courierprime.otf/courier-prime.otf)"))
+
+(define (init data)
+  (init-settings!)
+  (*state* (list (empty-scene)))
   
-  (define update-callback
-    (procedure->external
-     (init-update data)))
+  (add-key-up-listener! data)
+  (define update-callback (init-update data))
+  (define draw-callback (init-draw data))
   
-  (define draw-callback
-    (procedure->external
-     (init-draw data)))
-  
-  (define (init-call font)
-    (add-font! font-prime)
-    (request-animation-frame draw-callback)
-    (timeout update-callback dt))
-  
-  (then (load-font font-prime)
-	(procedure->external init-call)))
+  (then (load-font (prime-font))
+	(procedure->external
+	 (lambda (font)
+	   (add-font! font)
+	   (request-animation-frame draw-callback)
+	   (timeout update-callback dt)))))
