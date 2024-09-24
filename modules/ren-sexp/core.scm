@@ -28,11 +28,18 @@
 	    complete-current-scene!
 	    init))
 
+(define (empty-scene)
+  (make-scene
+   #:bg (%make-bg (make-image "resources/bg/black.png") 0)))
+
 (define (next-scene-increment src dst)
   (cond
-   ((not (equal? (scene-bg src) (scene-bg dst))) (next-bg src dst))
-   ((not (equal? (scene-sprites src) (scene-sprites dst))) (next-sprites src dst))
-   ((not (equal? (scene-text src) (scene-text dst))) (next-string src dst))
+   ((not (equal? (scene-bg src) (scene-bg dst)))
+    (next-bg src dst))
+   ((not (equal? (scene-sprites src) (scene-sprites dst)))
+    (next-sprites src dst))
+   ((not (equal? (scene-text src) (scene-text dst)))
+    (next-string src dst))
    (else src)))
 
 (define (local-and-remote-scene state data)
@@ -96,58 +103,16 @@
 (define (black-screen)
   (%make-bg (make-image "resources/bg/black.png") 1000))
 
-(define (empty-scene_)
-  (make-scene
-   #:bg (%make-bg (make-image "resources/bg/black.png") 0)))
+(define dt (/ 1000.0 60.0))
+(define *state* (make-parameter (list)))
 
-(define (init data)
-  (define empty-scene (empty-scene_))
-  (init-settings!)
-  (define *state* (make-parameter (list empty-scene)))
-  (define cursor-canvas (get-element-by-id "cursor-canvas"))
-  (define cursor-context (get-context cursor-canvas "2d"))
-  (define cursor-width    1920.0)
-  (define cursor-height   1080.0)
-  (set-element-width! cursor-canvas (exact cursor-width))
-  (set-element-height! cursor-canvas (exact cursor-height))
-  
-  (define canvas (get-element-by-id "all-canvas"))
-  (define context (get-context canvas "2d"))
-
-  (define text-canvas (get-element-by-id "text-canvas"))
-  (define text-context (get-context text-canvas "2d"))
-
-  (define game-width    1920.0)
-  (define game-height   1080.0)
+(define (init-keyboard data)
   (define key:space "Space")
   (define key:mute-toggle "KeyM")
   (define key:decrease-volume "Minus")
   (define key:increase-volume "Equal")
-
-  (define dt (/ 1000.0 60.0))
-
-  (define (draw prev-time)
-    (define current-state (*state*))
-    (define scene (last current-state))
-    (let ((text (scene-text scene))
-          (bg (scene-bg scene))
-	  (sprites (scene-sprites scene))
-	  (completed? (current-state-completed? current-state data)))
-      
-      (draw-bg bg context game-width game-height)
-      (draw-sprites sprites context)
-      (clear-rect text-context 0.0 0.0 game-width game-height)
-      (clear-rect cursor-context 0.0 0.0 game-width game-height)
-      (let* ((p&w (draw-text text text-context game-width game-height))
-	     (p (car p&w))
-	     (w (cdr p&w)))
-	(unless (equal? text "")
-         (draw-carret (make-carret "") cursor-context p w completed?))))
-    
-    (request-animation-frame draw-callback))
-  (define draw-callback (procedure->external draw))
   
-  (define (on-key-up data)
+  (define (on-key-up)
     (lambda (event)
       (let* ((key (keyboard-event-code event))
 	     (state (*state*))
@@ -166,50 +131,101 @@
 	     (pk 'music-toggle)
 	     (mute-toggle scene))
 	   (when (equal? key key:space)
-	     (*state* (if (current-scene-completed? local remote)
-			  (append-empty-scene! state data empty-scene)
-			  (complete-current-scene! local remote state)))))
+	     (*state*
+	      (if (current-scene-completed? local remote)
+		  (append-empty-scene! state data (empty-scene))
+		  (complete-current-scene! local remote state)))))
 	  (_ #t)))))
-  
+  (on-key-up))
+
+(define (init-update data)
   (define (update)
     (define state (*state*))
     (define scene (last (*state*)))
     (match (scene-state scene)
       ('play (*state* (compute-next-state state data)))
       (_ #t))
-    (timeout update-callback dt))
-  (define update-callback (procedure->external update))
+    (define update-callback-
+      (procedure->external update))
+    (timeout update-callback- dt))
+  update)
+
+(define (init-draw data)
+  (define carret-context (make-2d-context "carret-canvas"))
+  (define context (make-2d-context "all-canvas"))
+  (define text-context (make-2d-context "text-canvas"))
+  (define game-width    1920.0)
+  (define game-height   1080.0)
+  (set-font carret-context)
+  (set-font text-context)
   
-  (set-element-width! canvas (exact game-width))
-  (set-element-height! canvas (exact game-height))
+  (define (draw prev-time)
+    (define current-state (*state*))
+    (define scene (last current-state))
+    (let ((text (scene-text scene))
+          (bg (scene-bg scene))
+	  (sprites (scene-sprites scene))
+	  (completed? (current-state-completed? current-state data)))
+      
+      (draw-bg bg context game-width game-height)
+      (draw-sprites sprites context)
+      (clear-rect text-context 0.0 0.0 game-width game-height)
+      (clear-rect carret-context 0.0 0.0 game-width game-height)
+      (let* ((p&w (draw-text text
+			     text-context game-width game-height))
+	     (p (car p&w))
+	     (w (cdr p&w)))
+	(unless (equal? text "")
+          (draw-carret (make-carret "")
+		       carret-context p w completed?))))
 
-  (set-element-width! text-canvas (exact game-width))
-  (set-element-height! text-canvas (exact game-height))
+    (define draw-callback- (procedure->external draw))
+    (request-animation-frame draw-callback-))
+  draw)
 
-  (define Prime (download-font!
-		 "Prime"
-		 "url(resources/fonts/courierprime.otf/courier-prime.otf)"))
+(define (make-2d-context elem)
+  (define canvas (get-element-by-id elem))
+  (define context (get-context canvas "2d"))
+  (define width    1920.0)
+  (define height   1080.0)
+  (set-element-width! canvas (exact width))
+  (set-element-height! canvas (exact height))
+  context)
 
-  (add-event-listener! (current-document) "keyup"
-                       (procedure->external (on-key-up data)))
+(define (set-font context)
+  (set-fill-color! context "#ffffff")
+  (set-border-color! context "black")
+  (set-font! context "bold 40px Prime")
+  (set-text-align! context "left")
+  (set-shadow-blur! context 10)
+  (set-shadow-color! context "rgba(0,0,0,0.3)"))
 
+(define (init data)
+  (init-settings!)
+  (*state* (list (empty-scene)))
+  (define font-prime
+    (download-font!
+     "Prime"
+     "url(resources/fonts/courierprime.otf/courier-prime.otf)"))
+
+  (add-event-listener!
+   (current-document)
+   "keyup"
+   (procedure->external
+    (init-keyboard data)))
+  
+  (define update-callback
+    (procedure->external
+     (init-update data)))
+  
+  (define draw-callback
+    (procedure->external
+     (init-draw data)))
+  
   (define (init-call font)
-    (add-font! font)
+    (add-font! font-prime)
     (request-animation-frame draw-callback)
-    (timeout update-callback dt)
-    (set-fill-color! text-context "#ffffff")
-    (set-border-color! text-context "black")
-    (set-font! text-context "bold 40px Prime")
-    (set-text-align! text-context "left")
-    (set-shadow-blur! text-context 10)
-    (set-shadow-color! text-context "rgba(0,0,0,0.3)")
-
-    (set-fill-color! cursor-context "#ffffff")
-    (set-border-color! cursor-context "black")
-    (set-font! cursor-context "bold 40px Prime")
-    (set-text-align! cursor-context "left")
-    (set-shadow-blur! cursor-context 10)
-    (set-shadow-color! cursor-context "rgba(0,0,0,0.3)"))
+    (timeout update-callback dt))
   
-  (then (load-font Prime)
+  (then (load-font font-prime)
 	(procedure->external init-call)))
