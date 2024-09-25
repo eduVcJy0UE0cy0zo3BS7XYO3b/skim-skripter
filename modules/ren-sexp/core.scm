@@ -28,10 +28,6 @@
 	    complete-current-scene!
 	    init))
 
-(define (empty-scene)
-  (make-scene
-   #:bg (%make-bg (make-image "resources/bg/black.png") 0)))
-
 (define (next-scene-increment src dst)
   (cond
    ((not (equal? (scene-bg src) (scene-bg dst)))
@@ -104,7 +100,7 @@
   (%make-bg (make-image "resources/bg/black.png") 1000))
 
 (define dt (/ 1000.0 60.0))
-(define *state* (make-parameter (list)))
+(define *state* (make-parameter (list (make-scene))))
 
 (define (complete-or-begin-new-scene! data)
   (let* ((state (*state*))
@@ -114,7 +110,7 @@
 	 (remote (cdr local&current)))
     (*state*
      (if (current-scene-completed? local remote)
-	 (append-empty-scene! state data (empty-scene))
+	 (append-empty-scene! state data (make-scene))
 	 (complete-current-scene! local remote state)))))
 
 (define (init-keyboard data)
@@ -210,7 +206,6 @@
 
 (define (init data)
   (init-settings!)
-  (*state* (list (empty-scene)))
   
   (add-key-up-listener! data)
   (define update-callback (init-update data))

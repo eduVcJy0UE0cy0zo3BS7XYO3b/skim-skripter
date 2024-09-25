@@ -32,7 +32,7 @@
 (define* (make-scene
 	  #:key
 	  (state 'play)
-	  (bg "")
+	  (bg #f)
 	  (text "")
 	  (sprites (list))
 	  (music #f)

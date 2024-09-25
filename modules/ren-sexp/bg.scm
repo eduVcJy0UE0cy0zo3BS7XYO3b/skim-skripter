@@ -47,13 +47,15 @@
     (_ #f)))
 
 (define (next-bg src dst)
-  (define dst-bg (scene-bg dst))
-  (define src-bg (scene-bg src))
-  (define alpha (bg-alpha dst-bg))
-  (define delta 10)
-  (define next-alpha (+ alpha delta))
-  (define bg* (bg-update-alpha src-bg next-alpha))
-  (scene-update-bg dst bg*))
+  (let* ((dst-bg (scene-bg dst))
+	 (src-bg (scene-bg src)))
+    (if dst-bg
+	(let* ((alpha (bg-alpha dst-bg))
+	       (delta 10)
+	       (next-alpha (+ alpha delta))
+	       (bg* (bg-update-alpha src-bg next-alpha)))
+	  (scene-update-bg dst bg*))
+        (scene-update-bg dst (bg-update-alpha src-bg 0)))))
 
 (define (bg-update-alpha bg alpha*)
   (match bg
