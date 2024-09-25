@@ -118,25 +118,21 @@
 	 (complete-current-scene! local remote state)))))
 
 (define (init-keyboard data)
-  (let ((key:space "Space")
-	(key:mute-toggle "KeyM")
-	(key:decrease-volume "Minus")
-	(key:increase-volume "Equal"))
-    
-    (define (on-key-up)
-      (lambda (event)
-	(let* ((key (keyboard-event-code event))
-	       (scene (last (*state*))))
-	  (pk key)
-	  (match (scene-state scene)
-	    ('play
-	     (match key
-	       ((key:increase-volume) (change-volume scene 0.05))
-	       ((key:decrease-volume) (change-volume scene -0.05))
-	       ((key:mute-toggle) (mute-toggle scene))
-	       ((key:space) (complete-or-begin-new-scene! data))))
-	    (_ #t)))))
-    (on-key-up)))
+  (define (on-key-up)
+    (lambda (event)
+      (let* ((key (string->symbol (keyboard-event-code event)))
+	     (scene (last (*state*))))
+	(pk key)
+	(match (scene-state scene)
+	  ('play
+	   (match key
+	     ('Equal	(change-volume scene 0.05))
+	     ('Minus	(change-volume scene -0.05))
+	     ('KeyM	(mute-toggle scene))
+	     ('Space	(complete-or-begin-new-scene! data))
+	     (_ #t)))
+	  (_ #t)))))
+  (on-key-up))
 
 (define (init-update data)
   (define (update)
