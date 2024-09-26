@@ -34,8 +34,6 @@
 ;;           (else x))))
 
 (define-module (math)
-  #:pure
-  #:use-module (scheme base)
   #:use-module (hoot ffi)
   #:export (random clamp))
 

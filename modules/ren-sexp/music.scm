@@ -1,11 +1,10 @@
 (define-module (ren-sexp music)
-  #:pure
-  #:use-module (scheme base)
   #:use-module (scheme char)
   #:use-module (dom element)
   #:use-module (dom media)
   #:use-module (dom storage)
   #:use-module (ice-9 match)
+  #:use-module (hoot records)
   #:use-module (ren-sexp utils)
   #:use-module (ren-sexp scene)
   #:use-module (hoot debug)

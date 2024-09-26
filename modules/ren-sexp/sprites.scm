@@ -1,10 +1,9 @@
 (define-module (ren-sexp sprites)
-  #:pure
-  #:use-module (scheme base)
   #:use-module (scheme char)
   #:use-module (dom element)
   #:use-module (dom canvas)
   #:use-module (ice-9 match)
+  #:use-module (hoot records)
   #:use-module (ren-sexp utils)
   #:use-module (hoot debug)
   #:use-module (ren-sexp scene)

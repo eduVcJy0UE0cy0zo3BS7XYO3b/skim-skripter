@@ -19,8 +19,6 @@
 ;;; Code:
 
 (define-module (math vector)
-  #:pure
-  #:use-module (scheme base)
   #:use-module (scheme inexact)
   #:use-module ((hoot bytevectors)
                 #:select

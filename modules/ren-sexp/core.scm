@@ -1,6 +1,4 @@
 (define-module (ren-sexp core)
-  #:pure
-  #:use-module (scheme base)
   #:use-module (ice-9 match)
   #:use-module (dom document)
   #:use-module (dom canvas)
@@ -17,15 +15,10 @@
   #:use-module (ren-sexp music)
   #:use-module (ren-sexp carret)
   #:use-module (hoot debug)
+  #:use-module (hoot numbers)
   #:use-module (hoot ffi)
   #:use-module (ren-sexp utils)
-  #:export (next-scene-increment
-	    compute-next-state
-	    black-screen
-	    local-and-remote-scene
-	    current-scene-completed?
-	    append-empty-scene!
-	    complete-current-scene!
+  #:export (black-screen
 	    init))
 
 (define (next-scene-increment src dst)

@@ -1,5 +1,4 @@
 (define-module (ren-sexp scene)
-  #:use-module (scheme base)
   #:use-module (ice-9 match)
   #:use-module (hoot records)
   #:use-module (ren-sexp utils)

@@ -1,6 +1,4 @@
 (define-module (ren-sexp utils)
-  #:pure
-  #:use-module (scheme base)
   #:use-module (hoot ffi)
   #:export (string-split
             last

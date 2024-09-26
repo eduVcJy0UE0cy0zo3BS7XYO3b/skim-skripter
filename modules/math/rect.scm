@@ -19,8 +19,7 @@
 ;;; Code:
 
 (define-module (math rect)
-  #:pure
-  #:use-module (scheme base)
+  #:use-module (hoot records)
   #:use-module ((hoot bytevectors)
                 #:select
                 (bytevector-ieee-double-native-ref

@@ -1,5 +1,4 @@
 (define-module (dom storage)
-  #:use-module (scheme base)
   #:use-module (hoot ffi)
   #:export (get-item set-item!))
 
