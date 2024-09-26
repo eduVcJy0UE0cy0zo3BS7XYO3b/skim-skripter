@@ -21,15 +21,20 @@
   #:export (black-screen
 	    init))
 
-(define (next-scene-increment src dst)
+(define (next-scene-increment remote local)
   (cond
-   ((not (equal? (scene-bg src) (scene-bg dst)))
-    (next-bg src dst))
-   ((not (equal? (scene-sprites src) (scene-sprites dst)))
-    (next-sprites src dst))
-   ((not (equal? (scene-text src) (scene-text dst)))
-    (next-string src dst))
-   (else src)))
+   ((not (equal? (scene-bg remote) (scene-bg local)))
+    (next-bg remote local))
+   ((not (equal? (scene-sprites remote) (scene-sprites local)))
+    (next-sprites remote local))
+   ((not (equal? (scene-text remote) (scene-text local)))
+    (next-string remote local))
+   ((and (number? (scene-ttl local))
+	 (equal? (scene-ttl remote) (+ 1 (scene-ttl local))))
+    remote)
+   ((not (equal? (scene-ttl remote) (scene-ttl local)))
+    (next-ttl remote local))
+   (else remote)))
 
 (define (local-and-remote-scene state data)
   (define local/current-scene (last state))
@@ -51,12 +56,17 @@
 	 (remote (cdr local&current)))
     (current-scene-completed? local remote)))
 
+(define (inf-ttl? remote)
+  (equal? (scene-ttl remote) 'inf))
+
 (define (compute-next-state state data)
   (let* ((local&current (local-and-remote-scene state data))
 	 (local (car local&current))
 	 (remote (cdr local&current)))
     (if (current-scene-completed? local remote)
-	state
+	(if (inf-ttl? remote)
+	    state
+	    (append-empty-scene! (*state*) data (make-scene)))
 	(get-next-increment local remote state))))
 
 (define (append-empty-scene! state data empty-scene)

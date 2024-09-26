@@ -1,5 +1,5 @@
 (import (demo assets)
-	(scheme base)
+	(guile)
 	(ren-sexp scene)
 	(ren-sexp bg)
 	(ren-sexp music)
@@ -34,11 +34,12 @@
 
 (define bg:kitchen (%make-bg (image:kitchen) 1000))
 
-(define (chat-in-kitchen text chars)
+(define* (chat-in-kitchen text chars #:key (ttl 'inf))
   (make-scene #:bg bg:kitchen
 	      #:music music:curious_critters
 	      #:text text
-	      #:sprites chars))
+	      #:sprites chars
+	      #:ttl ttl))
 
 (define END
   (make-scene #:bg (make-bg (image:end))))
@@ -46,7 +47,11 @@
 (define script
   (list
    (welcome-scene)
-   (chat-in-kitchen "" (list))
+   (chat-in-kitchen "" (list) #:ttl 100)
+   (chat-in-kitchen ""
+		    (list masha:happy
+			  nastya:tired)
+		    #:ttl 20)
    (chat-in-kitchen "And here the water is ready."
 		    (list masha:happy
 			  nastya:tired))
