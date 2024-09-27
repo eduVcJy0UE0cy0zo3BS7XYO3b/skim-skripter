@@ -18,6 +18,7 @@
 	    scene-update-sprites
 	    scene-update-music
 	    scene-update-carret
+	    scene-update-ttl
 
 	    next-ttl))
 
