@@ -15,8 +15,10 @@
 	    
 	    scene-update-text
 	    scene-update-bg
+	    scene-add-bg
 	    scene-update-sprites
 	    scene-update-music
+	    scene-add-music
 	    scene-update-carret
 	    scene-update-ttl
 
@@ -65,6 +67,17 @@
 		 #:music music
 		 #:carret carret))))
 
+(define (scene-add-bg scene bg*)
+  (match scene
+    (($ <scene> state bg text sprites music carret ttl)
+     (make-scene #:state state
+		 #:bg bg*
+		 #:text text
+		 #:sprites sprites
+		 #:music music
+		 #:carret carret
+		 #:ttl 2))))
+
 (define (scene-update-bg scene bg*)
   (match scene
     (($ <scene> state bg text sprites music carret ttl)
@@ -86,6 +99,17 @@
 		 #:music music
 		 #:carret carret
 		 #:ttl ttl))))
+
+(define (scene-add-music scene music*)
+  (match scene
+    (($ <scene> state bg text sprites music carret ttl)
+     (make-scene #:state state
+		 #:bg bg
+		 #:text text
+		 #:sprites sprites
+		 #:music music*
+		 #:carret carret
+		 #:ttl 2))))
 
 (define (scene-update-music scene music*)
   (match scene

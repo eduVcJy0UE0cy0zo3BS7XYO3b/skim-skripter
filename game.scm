@@ -7,7 +7,7 @@
 	(ren-sexp sprites)
 	(ren-sexp core))
 
-(define (welcome-scene)
+(define WELCOME
   (make-scene
    #:bg (black-screen)
    #:text "Hello and Welcome to this new super visual novel engine!  Press <SPACE> to launch the game."))
@@ -39,9 +39,7 @@
   (make-scene #:bg (make-bg (image:end))))
 
 (define script
-  (->> '()
-       (CLEAN)
-       (JUST	(welcome-scene))
+  (->> (list WELCOME)
        (CLEAN)
        (BG	bg:kitchen)
        (BGM	music:curious_critters)

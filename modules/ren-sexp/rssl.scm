@@ -2,8 +2,6 @@
   #:use-module (ren-sexp scene)
   #:export (BG BGM PAUSE JOIN CLEAN TXT JUST ->>))
 
-
-
 (define-syntax ->>
     (syntax-rules ()
         ; Each syntax rule is a pair: a pattern to match on, and an expression to
@@ -35,10 +33,10 @@
             (->> (fn value) rest ...))))
 
 (define (BG image scenes)
-  (cons (scene-update-bg (car scenes) image) scenes))
+  (cons (scene-add-bg (car scenes) image) scenes))
 
 (define (BGM music scenes)
-  (cons (scene-update-music (car scenes) music) scenes))
+  (cons (scene-add-music (car scenes) music) scenes))
 
 (define (PAUSE time scenes)
   (cons (scene-update-ttl (car scenes) time) scenes))
@@ -47,7 +45,7 @@
   (cons (scene-update-sprites (car scenes) sprite) scenes))
 
 (define (CLEAN scenes)
-  (cons (make-scene) scenes))
+  (cons (make-scene #:ttl 2) scenes))
 
 (define (TXT text scenes)
   (cons (scene-update-text (car scenes) text) scenes))
