@@ -10,7 +10,16 @@
   #:use-module (ren-sexp scene)
   #:export (next-string
 	    draw-text
-	    get-lines))
+	    same-text?
+	    next-old-text
+	    draw-old-text
+	    same-old-text?))
+
+(define (same-text? text1 text2)
+  (equal? text1 text2))
+
+(define (same-old-text? text1 text2)
+  (equal? text1 text2))
 
 (define (get-lines context text)
   (if (string=? text "")
@@ -31,15 +40,29 @@
 	
 	(reverse (get-lines-iter '() (cdr words) current-line)))))
 
-(define (next-string src dst)
-  (define dst-text (scene-text dst))
-  (define src-text (scene-text src))
-  (define pos (string-length dst-text))
+(define (next-string next current)
+  (define current-text (scene-text current))
+  (define next-text (scene-text next))
+  (define pos (string-length current-text))
   (define next-pos (+ 1 pos))
-  (define text* (substring src-text 0 next-pos))
-  (scene-update-text dst text*))
+  (define text* (substring next-text 0 next-pos))
+  (scene-update-text current text*))
 
-(define (draw-text text context game-width game-height)
+(define (next-old-text next current)
+  (define current-text (scene-old-text current))
+  (define next-text (scene-old-text next))
+  (scene-add-text current next-text))
+
+(define (draw-old-text old-text context initial-padding)
+  (match old-text
+    ((text old-lines ...)
+     (draw-old-text
+      old-lines
+      context
+      (+ 20 (car (draw-text text context initial-padding)))))
+    (() initial-padding)))
+
+(define (draw-text text context initial-padding)
   (define lines (get-lines context text))
   (define (display-lines lines padding-top old-lines)
     (match lines
@@ -56,7 +79,7 @@
 		  (text-width (element-width (measure-text context last-line))))
 	     (cons padding-top text-width))))))
   
-  (let ((ans (display-lines lines 50.0 '())))
+  (let ((ans (display-lines lines initial-padding '())))
     (if (unspecified? ans)
 	(cons 50 0)
 	ans)))

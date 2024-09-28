@@ -1,7 +1,7 @@
 (define-module (ren-sexp rssl)
   #:use-module (ren-sexp scene)
   #:use-module (ren-sexp utils)
-  #:export (BG BGM PAUSE JOIN CLEAN TXT JUST UPDATE ->>))
+  #:export (BG BGM PAUSE JOIN CLEAN TXT +TXT JUST UPDATE ->>))
 
 (define-syntax ->>
     (syntax-rules ()
@@ -51,17 +51,32 @@
 	 (sprites* (find-replace sprite sprite* sprites)))
     (cons
      (scene-update-ttl
-      (scene-update-text
-       (scene-update-sprites last-scene sprites*)
-       "")
-      20)
+      (scene-add-text
+       (scene-update-text
+	(scene-update-sprites last-scene sprites*)
+	"")
+       (list))
+       10)
      scenes)))
 
 (define (CLEAN scenes)
   (cons (make-scene #:ttl 2) scenes))
 
 (define (TXT text scenes)
-  (cons (scene-update-text (car scenes) text) scenes))
+  (cons
+   (scene-add-text
+    (scene-update-text (car scenes) text)
+    (list))
+   scenes))
+
+(define (+TXT text scenes)
+  (cons
+   (scene-add-text
+    (scene-update-text (car scenes) text)
+    (cons (scene-text (cadr scenes))
+	  (scene-old-text (cadr scenes))))
+   scenes))
+
 
 (define (JUST scene scenes)
   (cons scene scenes))

@@ -41,23 +41,24 @@
 (define script
   (->> (list WELCOME)
        (CLEAN)
-       (BG	bg:kitchen)
        (BGM	music:curious_critters)
-       (PAUSE	100)
-       (JOIN	(list masha:happy nastya:tired))
+       (BG	bg:kitchen)
+       (PAUSE	50)
+       (JOIN	(list masha:normal nastya:tired))
+       (UPDATE	masha:normal masha:happy)
        (TXT	"And here the water is ready.")
 
        (UPDATE	nastya:tired nastya:normal)
-       (TXT	"My patience has ended!")
+       (+TXT	"My patience has ended!")
 
        (UPDATE	masha:happy masha:troubled)
-       (TXT	"Wait a little bit longer, please.")
+       (+TXT	"Wait a little bit longer, please.")
        
        (UPDATE	nastya:normal nastya:tired)
-       (TXT     "I don't want to wait, pour it faster.")
+       (+TXT     "I don't want to wait, pour it faster.")
 
        (UPDATE	masha:troubled masha:normal)
-       (TXT     "No, a tea ceremony must be performed according to the rules.")
+       (+TXT     "No, a tea ceremony must be performed according to the rules.")
 
        (UPDATE	nastya:tired nastya:normal)
        (TXT     "These strange procedures of yours.. these bowls with the size of a kitten's paw.. and it watery sour tea... What is the point of all these bourgeois trinkets?! Our forefathers drank a tea from kettles in samovars!")

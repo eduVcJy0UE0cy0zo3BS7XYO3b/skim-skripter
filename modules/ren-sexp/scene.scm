@@ -7,12 +7,14 @@
 	    make-scene
 	    scene-state
 	    scene-bg
+	    scene-old-text
 	    scene-text
 	    scene-sprites
 	    scene-music
 	    scene-carret
 	    scene-ttl
 	    
+	    scene-add-text
 	    scene-update-text
 	    scene-update-bg
 	    scene-add-bg
@@ -25,10 +27,11 @@
 	    next-ttl))
 
 (define-record-type <scene>
-  (%make-scene state bg text sprites music carret ttl)
+  (%make-scene state bg old-text text sprites music carret ttl)
   scene?
   (state scene-state)
   (bg scene-bg)
+  (old-text scene-old-text)
   (text scene-text)
   (sprites scene-sprites)
   (music scene-music)
@@ -39,29 +42,43 @@
 	  #:key
 	  (state 'play)
 	  (bg #f)
+	  (old-text (list))
 	  (text "")
 	  (sprites (list))
 	  (music #f)
 	  (carret "")
 	  (ttl 'inf))
-  (%make-scene state bg text sprites music carret ttl))
+  (%make-scene state bg old-text text sprites music carret ttl))
 
 (define (scene-update-carret scene carret*)
   (match scene
-    (($ <scene> state bg text sprites music carret ttl)
+    (($ <scene> state bg old-text text sprites music carret ttl)
      (make-scene #:state state
 		 #:bg bg
+		 #:old-text old-text
 		 #:text text
 		 #:sprites sprites
 		 #:music music
 		 #:carret carret*
 		 #:ttl ttl))))
 
-(define (scene-update-text scene text*)
+(define (scene-add-text scene old-text*)
   (match scene
-    (($ <scene> state bg text sprites music carret ttl)
+    (($ <scene> state bg old-text text sprites music carret ttl)
      (make-scene #:state state
 		 #:bg bg
+		 #:old-text old-text*
+		 #:text text
+		 #:sprites sprites
+		 #:music music
+		 #:carret carret))))
+
+(define (scene-update-text scene text*)
+  (match scene
+    (($ <scene> state bg old-text text sprites music carret ttl)
+     (make-scene #:state state
+		 #:bg bg
+		 #:old-text old-text
 		 #:text text*
 		 #:sprites sprites
 		 #:music music
@@ -69,9 +86,10 @@
 
 (define (scene-add-bg scene bg*)
   (match scene
-    (($ <scene> state bg text sprites music carret ttl)
+    (($ <scene> state bg old-text text sprites music carret ttl)
      (make-scene #:state state
 		 #:bg bg*
+		 #:old-text old-text
 		 #:text text
 		 #:sprites sprites
 		 #:music music
@@ -80,9 +98,10 @@
 
 (define (scene-update-bg scene bg*)
   (match scene
-    (($ <scene> state bg text sprites music carret ttl)
+    (($ <scene> state bg old-text text sprites music carret ttl)
      (make-scene #:state state
 		 #:bg bg*
+		 #:old-text old-text
 		 #:text text
 		 #:sprites sprites
 		 #:music music
@@ -91,9 +110,10 @@
 
 (define (scene-update-sprites scene sprites*)
   (match scene
-    (($ <scene> state bg text sprites music carret ttl)
+    (($ <scene> state bg old-text text sprites music carret ttl)
      (make-scene #:state state
 		 #:bg bg
+		 #:old-text old-text
 		 #:text text
 		 #:sprites sprites*
 		 #:music music
@@ -102,9 +122,10 @@
 
 (define (scene-add-music scene music*)
   (match scene
-    (($ <scene> state bg text sprites music carret ttl)
+    (($ <scene> state bg old-text text sprites music carret ttl)
      (make-scene #:state state
 		 #:bg bg
+		 #:old-text old-text
 		 #:text text
 		 #:sprites sprites
 		 #:music music*
@@ -113,9 +134,10 @@
 
 (define (scene-update-music scene music*)
   (match scene
-    (($ <scene> state bg text sprites music carret ttl)
+    (($ <scene> state bg old-text text sprites music carret ttl)
      (make-scene #:state state
 		 #:bg bg
+		 #:old-text old-text
 		 #:text text
 		 #:sprites sprites
 		 #:music music*
@@ -134,9 +156,10 @@
 
 (define (scene-update-ttl scene ttl*)
   (match scene
-    (($ <scene> state bg text sprites music carret ttl)
+    (($ <scene> state bg old-text text sprites music carret ttl)
      (make-scene #:state state
 		 #:bg bg
+		 #:old-text old-text
 		 #:text text
 		 #:sprites sprites
 		 #:music music

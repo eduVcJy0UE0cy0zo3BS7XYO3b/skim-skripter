@@ -19,7 +19,11 @@
 	    draw-sprites
 	    next-sprites
 	    get-same-sprites
-	    include-sprites))
+	    include-sprites
+	    same-sprites?))
+
+(define (same-sprites? sprite1 sprite2)
+  (equal? sprite1 sprite2))
 
 (define-record-type <sprite>
   (make-sprite img alpha pos character mood wear)

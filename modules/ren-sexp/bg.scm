@@ -12,11 +12,14 @@
 	    make-bg
 	    bg-img
 	    bg-alpha
-
+	    same-bg?
 	    draw-bg
 	    next-bg
 
 	    include-bg))
+
+(define (same-bg? bg1 bg2)
+  (equal? bg1 bg2))
 
 (define-record-type <bg>
   (%make-bg img alpha)
