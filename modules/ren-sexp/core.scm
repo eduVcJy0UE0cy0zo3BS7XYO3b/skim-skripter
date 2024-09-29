@@ -25,7 +25,6 @@
   (match (list next current)
     ((($ <scene> state* bg* old-text*
 	 text* sprites* music* carret* ttl*)
-
       ($ <scene> state  bg  old-text
 	 text  sprites  music  carret  ttl))
      (cond
@@ -157,10 +156,13 @@
   (let ((carret-context (make-2d-context "carret-canvas"))
 	(bg-context (make-2d-context "all-canvas"))
 	(text-context (make-2d-context "text-canvas"))
+	(old-text-context (make-2d-context "old-text-canvas"))
 	(GW   1920.0)
 	(GH   1080.0))
     (set-font carret-context)
     (set-font text-context)
+    (set-font old-text-context)
+    (define *last-pos* (make-parameter 0))
     
     (define (draw prev-time)
       (let* ((current-state (*state*))
@@ -171,19 +173,23 @@
 	     (sprites (scene-sprites scene))
 	     (completed?
 	      (current-state-completed? current-state data)))
+	(unless completed?
+	  (draw-bg bg bg-context GW GH)
+	  (draw-sprites sprites bg-context)
+	  (clear-rect old-text-context 0.0 0.0 GW GH)
+	  (define p1
+	    (draw-old-text (reverse old-text) old-text-context 50.0))
+	  (*last-pos* p1))
 	
-	(draw-bg bg bg-context GW GH)
-	(draw-sprites sprites bg-context)
 	(clear-rect text-context 0.0 0.0 GW GH)
 	(clear-rect carret-context 0.0 0.0 GW GH)
-	(let* ((p1 (draw-old-text old-text text-context 50.0))
-	       (p2&w2 (draw-text text text-context p1))
+	(let* ((p2&w2 (draw-text text text-context (*last-pos*)))
 	       (p2 (car p2&w2))
 	       (w2 (cdr p2&w2)))
 	  (unless (equal? text "")
             (draw-carret (make-carret "")
-			 carret-context p2 w2 completed?))))
-      (request-animation-frame draw-callback))
+			 carret-context p2 w2 completed?)))
+	(request-animation-frame draw-callback)))
     (define draw-callback (procedure->external draw))
     draw-callback))
 

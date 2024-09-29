@@ -59,7 +59,9 @@
      (draw-old-text
       old-lines
       context
-      (+ 20 (car (draw-text text context initial-padding)))))
+      (if (equal? text "")
+	  initial-padding
+	  (+ 20 (car (draw-text text context initial-padding))))))
     (() initial-padding)))
 
 (define (draw-text text context initial-padding)
