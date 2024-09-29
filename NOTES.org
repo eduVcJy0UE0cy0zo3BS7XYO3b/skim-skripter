@@ -5,10 +5,10 @@
 
 1. Теперь есть бегающая перед текстом каретка:
 
-[[https://files.catbox.moe/rt0ch0.webm][bottom text]]
+[[https://files.catbox.moe/rt0ch0.webm][клик меня]]
 2. А так же можно писать несколько строчек на одном экране
 
-[[https://files.catbox.moe/fw9zfu.webm][bottom text]]
+[[https://files.catbox.moe/fw9zfu.webm][клик меня]]
 
 3. Для пользователей -- всё.  Остальное подкапотные реализации.
 
