@@ -14,7 +14,7 @@
 
 (define (complete-or-begin-new-scene! data *state*)
   (let* ((state (*state*))
-	 (scene (last state))
+	 (scene (car state))
 	 (local&current (local-and-remote-scene state data))
 	 (local (car local&current))
 	 (remote (cdr local&current)))
@@ -33,7 +33,7 @@
 (define (init-keyboard data *state*)
   (lambda (event)
     (let* ((key (string->symbol (keyboard-event-code event)))
-	   (scene (last (*state*))))
+	   (scene (car (*state*))))
       (pk key)
       (match (scene-state scene)
 	('play

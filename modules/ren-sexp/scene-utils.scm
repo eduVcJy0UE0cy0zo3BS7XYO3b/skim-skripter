@@ -11,7 +11,7 @@
 	    append-empty-scene!))
 
 (define (local-and-remote-scene state data)
-  (define local/current-scene (last state))
+  (define local/current-scene (car state))
   (define local/current-scene-id (- (length state) 1))
   (define remote/current-scene (list-ref data local/current-scene-id))
   (cons local/current-scene remote/current-scene))
@@ -28,7 +28,7 @@
 (define (append-empty-scene! state data empty-scene)
   (unless (eq? (length state)
 	       (length data))
-    (let* ((curr-scene (last state))
+    (let* ((curr-scene (car state))
 	   (curr-scene-id+1 (length state))
 	   (next-scene (list-ref data curr-scene-id+1))
 	   
@@ -41,7 +41,11 @@
 	   (curr-music (scene-music curr-scene))
 	   (next-music (scene-music next-scene)))
       
-      (define next-scene1 (include-bg empty-scene curr-bg next-bg))
-      (define next-scene2 (include-sprites next-scene1 curr-sprites next-sprites))
-      (define next-scene3 (include-music next-scene2 curr-music next-music))
-      (append state (list next-scene3)))))
+      (define next-scene1
+	(include-bg empty-scene curr-bg next-bg))
+      (define next-scene2
+	(include-sprites next-scene1 curr-sprites next-sprites))
+      (define next-scene3
+	(include-music next-scene2 curr-music next-music))
+      
+      (cons next-scene3 state))))

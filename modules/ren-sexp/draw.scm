@@ -46,7 +46,7 @@
     
     (define (draw prev-time)
       (let* ((current-state (*state*))
-	     (scene (last current-state))
+	     (scene (car current-state))
 	     (text (scene-text scene))
 	     (old-text (scene-old-text scene))
              (bg (scene-bg scene))

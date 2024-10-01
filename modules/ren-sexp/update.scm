@@ -54,7 +54,7 @@
 (define (init-update data *state* dt)
   (define (update)
     (let* ((state (*state*))
-	   (scene (last state)))
+	   (scene (car state)))
       (match (scene-state scene)
 	('play (*state* (compute-next-state state data)))
 	(_ #t))

@@ -1,7 +1,6 @@
 (define-module (ren-sexp utils)
   #:use-module (hoot ffi)
   #:export (string-split
-            last
             find-replace))
 
 (define (string-split char-delimiter? string)
