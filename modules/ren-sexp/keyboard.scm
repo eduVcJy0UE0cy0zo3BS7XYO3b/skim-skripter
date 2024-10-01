@@ -26,7 +26,7 @@
 (define (add-key-up-listener! data *state*)
   (add-event-listener!
    (current-document)
-   "keyup"
+   "keydown"
    (procedure->external
     (init-keyboard data *state*))))
 

@@ -7,7 +7,6 @@
   #:use-module (ren-sexp scene)
   #:use-module (ren-sexp carret)
   #:use-module (ren-sexp scene-utils)
-  #:use-module (hoot debug)
   #:use-module (hoot ffi)
   #:use-module (ren-sexp utils)
   #:export (init-update))

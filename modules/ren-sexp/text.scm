@@ -4,7 +4,6 @@
   #:use-module (dom canvas)
   #:use-module (dom document)
   #:use-module (hoot strings)
-  #:use-module (hoot debug)
   #:use-module (ice-9 match)
   #:use-module (ren-sexp utils)
   #:use-module (ren-sexp scene)

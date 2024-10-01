@@ -19,14 +19,26 @@ canvas {
     z-index: 1;
 }
 
-#text-canvas {
+#gray-canvas {
     z-index: 2;
 }
 
-#carret-canvas {
+#text-canvas {
     z-index: 3;
 }
 
-#old-text-canvas {
+#carret-canvas {
     z-index: 4;
+}
+
+#old-text-canvas {
+    z-index: 5;
+}
+
+#menu-canvas {
+    z-index: 6;
+}
+
+#debug-canvas {
+    z-index: 7;
 }

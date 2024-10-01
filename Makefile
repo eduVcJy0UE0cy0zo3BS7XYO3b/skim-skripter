@@ -18,6 +18,7 @@ modules = \
   modules/ren-sexp/draw.scm \
   modules/ren-sexp/update.scm \
   modules/ren-sexp/scene-utils.scm \
+  modules/ren-sexp/debug-info.scm \
   demo/assets.scm \
   modules/ren-sexp/utils.scm
 

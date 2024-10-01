@@ -7,7 +7,6 @@
   #:use-module (hoot records)
   #:use-module (ren-sexp utils)
   #:use-module (ren-sexp scene)
-  #:use-module (hoot debug)
   #:export (<music>
 	    make-music
 	    music?

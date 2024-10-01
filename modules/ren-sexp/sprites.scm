@@ -5,7 +5,6 @@
   #:use-module (ice-9 match)
   #:use-module (hoot records)
   #:use-module (ren-sexp utils)
-  #:use-module (hoot debug)
   #:use-module (ren-sexp scene)
   #:export (<sprite>
 	    make-sprite
