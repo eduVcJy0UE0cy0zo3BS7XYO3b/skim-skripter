@@ -14,6 +14,10 @@ modules = \
   modules/ren-sexp/text.scm \
   modules/ren-sexp/carret.scm \
   modules/ren-sexp/rssl.scm \
+  modules/ren-sexp/keyboard.scm \
+  modules/ren-sexp/draw.scm \
+  modules/ren-sexp/update.scm \
+  modules/ren-sexp/scene-utils.scm \
   demo/assets.scm \
   modules/ren-sexp/utils.scm
 
