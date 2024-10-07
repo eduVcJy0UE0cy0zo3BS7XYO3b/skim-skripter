@@ -19,6 +19,8 @@ modules = \
   modules/ren-sexp/update.scm \
   modules/ren-sexp/scene-utils.scm \
   modules/ren-sexp/debug-info.scm \
+  modules/repl-environment.scm \
+  modules/repl.scm \
   demo/assets.scm \
   modules/ren-sexp/utils.scm
 

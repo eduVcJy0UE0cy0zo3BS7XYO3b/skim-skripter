@@ -24,7 +24,8 @@ window.addEventListener("load", async () => {
 		    getElementById: (id) => document.getElementById(id),
 		    createTextNode: (text) => document.createTextNode(text),
 		    createElement: (tag) => document.createElement(tag),
-		    addFont: (font) => document.fonts.add(font)
+		    addFont: (font) => document.fonts.add(font),
+		    createTreeWalker: Document.prototype.createTreeWalker.bind(document)
 		},
 		element: {
 		    value: (elem) => elem.value,
@@ -39,13 +40,21 @@ window.addEventListener("load", async () => {
 		    remove: (elem) => elem.remove(),
 		    replaceWith: (oldElem, newElem) => oldElem.replaceWith(newElem),
 		    clone: (elem) => elem.cloneNode(),
-		    then: (promise, func) => promise.then((font) => func(font))
+		    then: (promise, func) => promise.then((font) => func(font)),
+		    removeEventListener(elem, name, f) { elem.removeEventListener(name, f); },
+		    addEventListener(elem, name, f) { elem.addEventListener(name, f); },
+		    scrollHeight(elem) { return elem.scrollHeight; },
+		    setScrollTop(elem, value) { elem.scrollTop = value; },
+		    setChecked(elem, checked) { elem.checked = (checked == 1); },
+		    checked(elem) { return elem.checked; },
 		},
 		event: {
 		    addEventListener: (target, type, listener) => target.addEventListener(type, listener),
 		    removeEventListener: (target, type, listener) => target.removeEventListener(type, listener),
 		    preventDefault: (event) => event.preventDefault(),
-		    keyboardCode: (event) => event.code
+		    keyboardCode: (event) => event.code,
+		    keyboardKey(event) { return event.key; },
+		    keyboardShiftKey(event) { return event.shiftKey; }
 		},
 		image: {
 		    new: (src) => {
@@ -90,6 +99,13 @@ window.addEventListener("load", async () => {
 		},
 		math: {
 		    random: () => Math.random()
+		},
+		treeWalker: {
+		    currentNode(walker) { return walker.currentNode; },
+		    setCurrentNode(walker, node) { walker.currentNode = node; },
+		    nextNode(walker) { return walker.nextNode(); },
+		    firstChild(walker) { return walker.firstChild(); },
+		    nextSibling(walker) { return walker.nextSibling(); }
 		}
 	    }
 	});

@@ -1,0 +1,8 @@
+(define-module (repl)
+  #:use-module (hoot eval)
+  #:use-module (hoot ffi)
+  #:use-module (hoot hashtables)
+  #:use-module ((hoot error-handling) #:select (format-exception))
+  #:use-module (ice-9 match)
+  #:use-module (repl-environment)
+  #:use-module (srfi srfi-11))
