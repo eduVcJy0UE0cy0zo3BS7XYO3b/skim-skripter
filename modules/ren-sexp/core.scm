@@ -33,7 +33,6 @@
   (init-settings!)
   
   (define dt (/ 1000.0 60.0))
-  (define *state* (make-parameter (list (make-scene))))
 
   (define (make-box in out default)
   (let lp ((old default))
@@ -47,8 +46,8 @@
   (spawn-fiber (lambda ()
 		 (make-box state-in state-out (list (make-scene)))))
   
-  (add-key-up-listener! data *state*)
-  (define update-callback (init-update data *state* dt))
+  (add-key-up-listener! data state-in state-out)
+  (define update-callback (init-update data state-in state-out dt))
   
   (then (load-font (ptsans-font))
 	(procedure->external

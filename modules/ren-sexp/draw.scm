@@ -12,6 +12,7 @@
   #:use-module (ren-sexp scene-utils)
   #:use-module (ren-sexp carret)
   #:use-module (hoot numbers)
+  #:use-module (fibers channels)
   #:use-module (hoot ffi)
   #:use-module (ren-sexp utils)
   #:export (init-draw))
@@ -35,7 +36,7 @@
   (set-shadow-offset-x! context 5)
   (set-shadow-offset-y! context 5))
 
-(define (init-draw data *state*)
+(define (init-draw data in out)
   (let ((carret-context (make-2d-context "carret-canvas"))
 	(bg-context (make-2d-context "all-canvas"))
 	(gray-context (make-2d-context "gray-canvas"))
@@ -58,14 +59,15 @@
     (define *last-time* (make-parameter 0))
     
     (define (draw prev-time)
-      (let* ((current-state (*state*))
-	     (scene (car current-state))
+      (let* ((_ (put-message in #f))
+	     (state (get-message out))
+	     (scene (car state))
 	     (text (scene-text scene))
 	     (old-text (scene-old-text scene))
              (bg (scene-bg scene))
 	     (sprites (scene-sprites scene))
 	     (completed?
-	      (current-state-completed? current-state data)))
+	      (current-state-completed? state data)))
 
 	(*fps-counter* (+ (*fps-counter*) 1))
 
