@@ -22,6 +22,11 @@
    "Prime"
    "url(resources/fonts/courierprime.otf/courier-prime.otf)"))
 
+(define (ptsans-font)
+  (download-font!
+   "PTSans"
+   "url(resources/fonts/PT_Sans/PTSans-Regular.ttf)"))
+
 (define (init data)
   (init-settings!)
   
@@ -32,7 +37,7 @@
   (define update-callback (init-update data *state* dt))
   (define draw-callback (init-draw data *state*))
   
-  (then (load-font (prime-font))
+  (then (load-font (ptsans-font))
 	(procedure->external
 	 (lambda (font)
 	   (add-font! font)

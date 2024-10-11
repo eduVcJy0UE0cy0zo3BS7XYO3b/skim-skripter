@@ -1,3 +1,18 @@
+#+title: SkimSkripter
+#+author: liltechdude
+
+* Introduction
+#+begin_src scheme :noweb yes :tangle game.scm
+<<imports>>
+<<assets>>
+<<script>>
+<<repl>>
+<<init>>
+#+end_src
+
+* Imports
+#+name: imports
+#+begin_src scheme
 (use-modules
  (demo assets)
  (fibers)
@@ -17,6 +32,11 @@
  (ren-sexp music)
  (ren-sexp sprites)
  (ren-sexp core))
+#+end_src
+
+* Assets
+#+name: assets
+#+begin_src scheme
 (define WELCOME
   (make-scene
    #:bg (black-screen)
@@ -47,6 +67,11 @@
 
 (define END
   (make-scene #:bg (make-bg (image:end))))
+#+end_src
+
+* Script
+#+name: script
+#+begin_src scheme 
 (define script
   (->> (list WELCOME)
        (CLEAN)
@@ -94,6 +119,11 @@
        (TXT     "Fine. There will be a samovar. In a week, lets gather at an interesting place near the Yeltsin Center. For now... The water is exactly the right temperature. Today we will try my raspberry tea.")
        
        (JUST	END)))
+#+end_src
+
+* Repl
+#+name: repl
+#+begin_src scheme
 (define-foreign document-body
   "document" "body"
   -> (ref null extern))
@@ -512,6 +542,11 @@
 				    (rows "5")
 				    (keyup ,maybe-eval))))))))
 
+#+end_src
+
+* Init
+#+name: init
+#+begin_src scheme 
 (lambda (resolved rejected)
   (call-with-async-result
    resolved rejected
@@ -521,3 +556,4 @@
      (init (reverse script))
      (pk "Done!")
      42)))
+#+end_src

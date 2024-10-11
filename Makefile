@@ -24,9 +24,11 @@ modules = \
   demo/assets.scm \
   modules/ren-sexp/utils.scm
 
+game.scm: game.org
+	emacs --batch --eval "(require 'org)" --eval '(org-babel-tangle-file "game.org")'
 
 game.wasm: game.scm $(modules)
-	guild compile-wasm -L modules -L . -o $@ $<
+	guild compile-wasm --async -L modules -L . -o $@ $<
 
 serve: game.wasm
 	guix shell python -- python3 -m http.server

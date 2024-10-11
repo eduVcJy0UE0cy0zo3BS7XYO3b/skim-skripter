@@ -40,7 +40,9 @@
 	    set-shadow-color!
 	    context-save!
 	    context-restore!
-	    set-global-composite-operation!))
+	    set-global-composite-operation!
+	    set-shadow-offset-x!
+	    set-shadow-offset-y!))
 
 ;; HTMLCanvasElement
 (define-foreign get-context
@@ -114,3 +116,11 @@
 (define-foreign context-restore!
   "canvas" "restore"
   (ref extern) -> (ref extern))
+
+(define-foreign set-shadow-offset-x!
+  "canvas" "shadowOffsetX"
+  (ref extern) i32 -> (ref extern))
+
+(define-foreign set-shadow-offset-y!
+  "canvas" "shadowOffsetY"
+  (ref extern) i32 -> (ref extern))

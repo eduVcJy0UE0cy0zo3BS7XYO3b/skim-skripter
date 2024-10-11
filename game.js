@@ -1,6 +1,6 @@
 window.addEventListener("load", async () => {
     try {
-	await Scheme.load_main("game.wasm", {
+	const [proc] = await Scheme.load_main("game.wasm", {
 	    user_imports: {
 		window: {
 		    get: () => window,
@@ -95,7 +95,9 @@ window.addEventListener("load", async () => {
 		    setScale: (ctx, sx, sy) => ctx.scale(sx, sy),
 		    setTransform: (ctx, a, b, c, d, e, f) => ctx.setTransform(a, b, c, d, e, f),
 		    measureText: (ctx, line) => ctx.measureText(line),
-		    setImageSmoothingEnabled: (ctx, enabled) => ctx.imageSmoothingEnabled = (enabled == 1)
+		    setImageSmoothingEnabled: (ctx, enabled) => ctx.imageSmoothingEnabled = (enabled == 1),
+		    shadowOffsetX: (ctx, offset) => ctx.shadowOffsetX = offset,
+		    shadowOffsetY: (ctx, offset) => ctx.shadowOffsetY = offset,
 		},
 		math: {
 		    random: () => Math.random()
@@ -108,7 +110,8 @@ window.addEventListener("load", async () => {
 		    nextSibling(walker) { return walker.nextSibling(); }
 		}
 	    }
-	});
+	})
+	proc.call_async();
     } catch(e) {
 	if(e instanceof WebAssembly.CompileError) {
 	    document.getElementById("wasm-error").hidden = false;
