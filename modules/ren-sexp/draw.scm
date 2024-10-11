@@ -91,7 +91,6 @@
 	       (w2 (cdr p2&w2)))
 	  (unless (equal? text "")
             (draw-carret (make-carret "")
-			 carret-context p2 w2 completed?)))
-	(request-animation-frame draw-callback)))
+			 carret-context p2 w2 completed?)))))
     (define draw-callback (procedure->external draw))
     draw-callback))

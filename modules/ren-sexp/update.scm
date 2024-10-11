@@ -8,6 +8,7 @@
   #:use-module (ren-sexp carret)
   #:use-module (ren-sexp scene-utils)
   #:use-module (hoot ffi)
+  #:use-module (ren-sexp draw)
   #:use-module (ren-sexp utils)
   #:export (init-update))
 
@@ -51,13 +52,15 @@
 	(get-next-increment local remote state))))
 
 (define (init-update data *state* dt)
+  (define draw-callback (init-draw data *state*))
+  
   (define (update)
     (let* ((state (*state*))
 	   (scene (car state)))
       (match (scene-state scene)
 	('play (*state* (compute-next-state state data)))
 	(_ #t))
-      (timeout update-callback dt)))
-  (define update-callback
-    (procedure->external update))
+      (timeout update-callback dt)
+      (request-animation-frame draw-callback)))
+  (define update-callback (procedure->external update))
   update-callback)

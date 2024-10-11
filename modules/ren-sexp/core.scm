@@ -5,12 +5,14 @@
   #:use-module (dom window)
   #:use-module (dom image)
   #:use-module (hoot ffi)
+  #:use-module (fibers)
+  #:use-module (fibers channels)
+  #:use-module (ice-9 match)
   #:use-module (ren-sexp settings)
   #:use-module (ren-sexp scene)
   #:use-module (ren-sexp bg)
   #:use-module (ren-sexp sprites)
   #:use-module (ren-sexp keyboard)
-  #:use-module (ren-sexp draw)
   #:use-module (ren-sexp update)
   #:export (black-screen init))
 
@@ -32,14 +34,24 @@
   
   (define dt (/ 1000.0 60.0))
   (define *state* (make-parameter (list (make-scene))))
+
+  (define (make-box in out default)
+  (let lp ((old default))
+    (match (get-message in)
+      (#f (put-message out old))
+      (data (lp data)))
+    (lp old)))
+  
+  (define state-in (make-channel))
+  (define state-out (make-channel))
+  (spawn-fiber (lambda ()
+		 (make-box state-in state-out (list (make-scene)))))
   
   (add-key-up-listener! data *state*)
   (define update-callback (init-update data *state* dt))
-  (define draw-callback (init-draw data *state*))
   
   (then (load-font (ptsans-font))
 	(procedure->external
 	 (lambda (font)
 	   (add-font! font)
-	   (request-animation-frame draw-callback)
 	   (timeout update-callback dt)))))
