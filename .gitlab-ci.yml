@@ -1,0 +1,12 @@
+image: registry.gitlab.com/spritely/guile-hoot:latest
+
+stages:
+  - build
+
+build:
+  stage: build
+  script:
+    - make bundle
+  artifacts:
+    paths:
+      - game.zip
