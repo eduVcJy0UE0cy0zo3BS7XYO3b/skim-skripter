@@ -59,6 +59,8 @@
         (scene-update-bg dst (bg-update-alpha src-bg 0)))))
 
 (define (bg-update-alpha bg alpha*)
+  (pk "BG is: ")
+  (pk bg)
   (match bg
     (($ <bg> img alpha)
      (%make-bg img alpha*))))

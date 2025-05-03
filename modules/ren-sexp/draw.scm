@@ -1,5 +1,6 @@
 (define-module (ren-sexp draw)
   #:use-module (ice-9 match)
+  #:use-module (goblins)
   #:use-module (dom document)
   #:use-module (dom canvas)
   #:use-module (dom element)
@@ -36,7 +37,7 @@
   (set-shadow-offset-x! context 5)
   (set-shadow-offset-y! context 5))
 
-(define (init-draw data in out)
+(define (init-draw state)
   (let ((carret-context (make-2d-context "carret-canvas"))
 	(bg-context (make-2d-context "all-canvas"))
 	(gray-context (make-2d-context "gray-canvas"))
@@ -59,15 +60,12 @@
     (define *last-time* (make-parameter 0))
     
     (define (draw prev-time)
-      (let* ((_ (put-message in #f))
-	     (state (get-message out))
-	     (scene (car state))
+      (let* ((scene ($ state 'current-scene))
 	     (text (scene-text scene))
 	     (old-text (scene-old-text scene))
              (bg (scene-bg scene))
 	     (sprites (scene-sprites scene))
-	     (completed?
-	      (current-state-completed? state data)))
+	     (completed? ($ state 'current-state-completed?)))
 
 	(*fps-counter* (+ (*fps-counter*) 1))
 

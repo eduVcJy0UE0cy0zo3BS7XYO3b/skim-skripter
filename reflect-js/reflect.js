@@ -1,10 +1,13 @@
 // -*- js2-basic-offset: 4 -*-
+
 class Char {
     constructor(codepoint) {
         this.codepoint = codepoint;
     }
     toString() {
         let ch = String.fromCodePoint(this.codepoint);
+        if (ch == '\n') return '#\\newline';
+        if (ch == '\r') return '#\\return';
         if (ch.match(/[a-zA-Z0-9$[\]().]/)) return `#\\${ch}`;
         return `#\\x${this.codepoint.toString(16)}`;
     }
@@ -137,6 +140,7 @@ class WeakTable extends HeapObject { toString() { return "#<weak-table>"; } }
 class Fluid extends HeapObject { toString() { return "#<fluid>"; } }
 class DynamicState extends HeapObject { toString() { return "#<dynamic-state>"; } }
 class Syntax extends HeapObject { toString() { return "#<syntax>"; } }
+class SyntaxTransformer extends HeapObject { toString() { return "#<syntax-transformer>"; } }
 class Port extends HeapObject { toString() { return "#<port>"; } }
 class Struct extends HeapObject { toString() { return "#<struct>"; } }
 
@@ -238,11 +242,39 @@ class Scheme {
             },
         });
         mod.set_ffi_handler({
+            is_extern_func: (x) => typeof(x) === "function",
+            call_extern: (f, args) => {
+                const jsArgs = [];
+                for(args = this.#to_js(args); !(args instanceof Null); args = this.cdr(args)) {
+                    jsArgs.push(this.car(args));
+                }
+                let result = f(...jsArgs);
+                if(result === undefined || result === null) {
+                    result = new Unspecified();
+                }
+                return this.#to_scm(result);
+            },
             procedure_to_extern: (obj) => {
                 const proc = this.#to_js(obj);
                 return (...args) => {
-                    return proc.call(...args);
+                    return proc.call(...args)[0];
                 };
+            }
+        });
+        mod.set_finalization_handler({
+            make_finalization_registry: (f) => new FinalizationRegistry(f),
+            finalization_registry_register: (registry, target, heldValue) => {
+                // heldValue is a Wasm struct and needs to be wrapped
+                // so that when it goes back to Scheme via the
+                // finalizer callback it is seen as a Scheme value and
+                // not an external one.
+                registry.register(target, this.#to_js(heldValue));
+            },
+            finalization_registry_register_with_token: (registry, target, heldValue, unregisterToken) => {
+                registry.register(target, this.#to_js(heldValue), unregisterToken);
+            },
+            finalization_registry_unregister: (registry, unregisterToken) => {
+                return registry.unregister(unregisterToken);
             }
         });
         let proc = new Procedure(this, mod.get_export('$load').value);
@@ -330,6 +362,7 @@ class Scheme {
             fluid: () => new Fluid(this, scm),
             'dynamic-state': () => new DynamicState(this, scm),
             syntax: () => new Syntax(this, scm),
+            'syntax-transformer': () => new SyntaxTransformer(this, scm),
             port: () => new Port(this, scm),
             struct: () => new Struct(this, scm),
             'extern-ref': () => api.extern_value(scm)
@@ -484,6 +517,7 @@ class SchemeModule {
     #io_handler;
     #debug_handler;
     #ffi_handler;
+    #finalization_handler;
     static #rt = {
         bignum_from_string(str) { return BigInt(str); },
         bignum_from_i32(n) { return BigInt(n); },
@@ -533,6 +567,20 @@ class SchemeModule {
         bignum_logand(a, b) { return BigInt(a) & BigInt(b); },
         bignum_logior(a, b) { return BigInt(a) | BigInt(b); },
         bignum_logxor(a, b) { return BigInt(a) ^ BigInt(b); },
+        bignum_logcount(a) {
+            let c = 0;
+            // Iterate over 32-bit chunks of the BigInt until all bits
+            // are consumed.
+            for(let b = a; b > 0n; b = b >> 32n) {
+                let v = Number(BigInt.asUintN(32, b));
+                // Bit shift magic from:
+                // https://graphics.stanford.edu/~seander/bithacks.html#CountBitsSetParallel
+                v = v - ((v >> 1) & 0x55555555);
+                v = (v & 0x33333333) + ((v >> 2) & 0x33333333);
+                c += ((v + (v >> 4) & 0xF0F0F0F) * 0x1010101) >> 24;
+            }
+            return c;
+        },
 
         bignum_lt(a, b) { return a < b; },
         bignum_le(a, b) { return a <= b; },
@@ -544,6 +592,12 @@ class SchemeModule {
 
         string_upcase: Function.call.bind(String.prototype.toUpperCase),
         string_downcase: Function.call.bind(String.prototype.toLowerCase),
+
+        make_weak_ref(x) { return new WeakRef(x); },
+        weak_ref_deref(ref, fail) {
+            const val = ref.deref();
+            return val === undefined ? fail: val;
+        },
 
         make_weak_map() { return new WeakMap; },
         weak_map_get(map, k, fail) {
@@ -567,6 +621,35 @@ class SchemeModule {
         jiffies_per_second() { return 1000000; },
         current_jiffy() { return performance.now() * 1000; },
         current_second() { return Date.now() / 1000; },
+        make_date(year, month, day, hour, min, sec, ms) {
+            return new Date(year, month, day, hour, min, sec, ms);
+        },
+        ms_utc_to_date(t) { return new Date(t); },
+        date_year(d) { return d.getFullYear(); },
+        date_month(d) { return d.getMonth(); },
+        date_day(d) { return d.getDate(); },
+        date_weekday(d) { return d.getDay(); },
+        date_hour(d) { return d.getHours(); },
+        date_min(d) { return d.getMinutes(); },
+        date_sec(d) { return d.getSeconds(); },
+        date_ms(d) { return d.getMilliseconds(); },
+        date_timezone_offset(d) { return d.getTimezoneOffset(); },
+        date_locale(d) {
+            return new Intl.DateTimeFormat(undefined, {
+                dateStyle: "long",
+                timeStyle: "long"
+            }).format(d);
+        },
+        date_locale_date(d) {
+            return new Intl.DateTimeFormat(undefined, {
+                dateStyle: "long"
+            }).format(d);
+        },
+        date_locale_time(d) {
+            return new Intl.DateTimeFormat(undefined, {
+                timeStyle: "long"
+            }).format(d);
+        },
 
         async_invoke,
         async_invoke_later,
@@ -842,15 +925,35 @@ class SchemeModule {
             debug_str_scm(x, y) { mod.#debug_handler.debug_str_scm(x, y); },
             code_name(code) { return SchemeModule.#code_name(code); },
             code_source(code) { return SchemeModule.#code_source(code); },
-        }
+        };
         let ffi = {
+            is_extern_func(x) {
+                return mod.#ffi_handler.is_extern_func(x);
+            },
+            call_extern(f, args) {
+                return mod.#ffi_handler.call_extern(f, args);
+            },
             procedure_to_extern(proc) {
                 return mod.#ffi_handler.procedure_to_extern(proc);
             }
         };
+        let finalization = {
+            make_finalization_registry(f) {
+                return mod.#finalization_handler.make_finalization_registry(f);
+            },
+            finalization_registry_register(registry, target, heldValue) {
+                mod.#finalization_handler.finalization_registry_register(registry, target, heldValue);
+            },
+            finalization_registry_register_with_token(registry, target, heldValue, unregisterToken) {
+                mod.#finalization_handler.finalization_registry_register_with_token(registry, target, heldValue, unregisterToken);
+            },
+            finalization_registry_unregister(registry, unregisterToken) {
+                return mod.#finalization_handler.finalization_registry_unregister(registry, unregisterToken);
+            }
+        };
         let imports = {
           rt: SchemeModule.#rt,
-          abi, debug, io, ffi, ...user_imports
+          abi, debug, io, ffi, finalization, ...user_imports
         };
         let { module, instance } = await instantiate_streaming(path, imports);
         let mod = new SchemeModule(instance);
@@ -859,6 +962,7 @@ class SchemeModule {
     set_io_handler(h) { this.#io_handler = h; }
     set_debug_handler(h) { this.#debug_handler = h; }
     set_ffi_handler(h) { this.#ffi_handler = h; }
+    set_finalization_handler(h) { this.#finalization_handler = h; }
     all_exports() { return this.#instance.exports; }
     exported_abi() {
         let abi = {}

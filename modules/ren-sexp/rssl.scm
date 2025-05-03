@@ -1,7 +1,7 @@
 (define-module (ren-sexp rssl)
   #:use-module (ren-sexp scene)
   #:use-module (ren-sexp utils)
-  #:export (BG BGM PAUSE JOIN CLEAN TXT +TXT JUST UPDATE ->>))
+  #:export (BG BGM PAUSE JOIN CLEAN TXT +TXT JUST UPDATE))
 
 (define-syntax ->>
     (syntax-rules ()

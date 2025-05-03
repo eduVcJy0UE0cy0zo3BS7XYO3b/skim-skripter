@@ -24,11 +24,11 @@ modules = \
   demo/assets.scm \
   modules/ren-sexp/utils.scm
 
+game.wasm: game.scm $(modules)
+	guild compile-wasm --async -g1 -L /gnu/store/q4648183qkl43ky8yp3qqikv63j67dw7-guile-goblins-0.15.1/share/guile/site/3.0 -L /gnu/store/9vm4izgsp0g007d82zgmrvg9zczkxjxj-profile/share/guile/3.0 -L modules -L . -o $@ $<
+
 game.scm: game.org
 	emacs --batch --eval "(require 'org)" --eval '(org-babel-tangle-file "game.org")'
-
-game.wasm: game.scm $(modules)
-	guild compile-wasm --async -L modules -L . -o $@ $<
 
 serve: game.wasm
 	guix shell python -- python3 -m http.server

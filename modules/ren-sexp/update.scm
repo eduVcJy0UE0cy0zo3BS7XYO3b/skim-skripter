@@ -1,5 +1,6 @@
 (define-module (ren-sexp update)
   #:use-module (ice-9 match)
+  #:use-module (goblins)
   #:use-module (dom window)
   #:use-module (ren-sexp text)
   #:use-module (ren-sexp bg)
@@ -13,7 +14,11 @@
   #:use-module (ren-sexp utils)
   #:export (init-update))
 
+(define (inf-ttl? scene)
+  (equal? (scene-ttl scene) 'inf))
+
 (define (next-scene-increment next current)
+  (pk (list next current))
   (match (list next current)
     ((($ <scene> state* bg* old-text*
 	 text* sprites* music* carret* ttl*)
@@ -34,33 +39,21 @@
        (next-ttl next current))
       (else next)))))
 
-(define (get-next-increment local remote state)
-  (define local* (next-scene-increment remote local))
-  (define state* (find-replace local local* state))
-  state*)
+(define (compute-next-state scene ^state)
+  (let* ((next ($ ^state 'current-story-scene)))
+    (if ($ ^state 'current-state-completed?)
+	(if (inf-ttl? next)
+	    scene
+	    (append-empty-scene! ^state (make-scene)))
+	(next-scene-increment next scene))))
 
-(define (inf-ttl? scene)
-  (equal? (scene-ttl scene) 'inf))
-
-(define (compute-next-state state data)
-  (let* ((local&current (local-and-remote-scene state data))
-	 (local (car local&current))
-	 (remote (cdr local&current)))
-    (if (current-scene-completed? local remote)
-	(if (inf-ttl? remote)
-	    state
-	    (append-empty-scene! state data (make-scene)))
-	(get-next-increment local remote state))))
-
-(define (init-update data in out dt)
-  (define draw-callback (init-draw data in out))
-  
+(define (init-update ^state dt)
+  (define draw-callback (init-draw ^state))
   (define (update)
-    (let* ((_ (put-message in #f))
-	   (state (get-message out))
-	   (scene (car state)))
+    (let ((scene ($ ^state 'current-scene)))
       (match (scene-state scene)
-	('play (put-message in (compute-next-state state data)))
+	('play ($ ^state 'update-current-scene
+		  (compute-next-state scene ^state)))
 	(_ #t))
       (timeout update-callback dt)
       (request-animation-frame draw-callback)))

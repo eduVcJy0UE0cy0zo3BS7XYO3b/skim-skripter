@@ -12,6 +12,7 @@
 * Imports
 #+name: imports
 #+begin_src scheme
+
 (use-modules
  (demo assets)
  (fibers)
@@ -22,16 +23,46 @@
  (hoot hashtables)                                  	
  ((hoot error-handling) #:select (format-exception))
  (ice-9 match)                                      
- (repl-environment)                                 
+ ;(repl-environment)                                 
  (srfi srfi-11)
  (guile)
- (repl)
+ ;(repl)
  (ren-sexp scene)
  (ren-sexp rssl)
  (ren-sexp bg)
  (ren-sexp music)
  (ren-sexp sprites)
  (ren-sexp core))
+
+(define-syntax ->>
+  (syntax-rules ()
+					; Each syntax rule is a pair: a pattern to match on, and an expression to
+					; rewrite to. This first list is the pattern: both args (`->>`, `value`)
+					; are just variables, which we could name however we want. Since the first
+					; part of the pattern matches the macro name, we bind it to `->>`, but `_`
+					; is another popular choice.
+					; So, this pattern matches, e.g., (->> 3)...
+    ((->> value)
+					; ...and rewrites to the expression 3, our expected result
+     value)
+
+					; Here we match a more complex pattern, where the second var is a list--
+					; that is, a function call. Note the ellipses, which gather multiple items
+					; into `args` and `rest`.
+					; This would match, e.g., (->> 3 (+ 1 2) (/ 3))...
+    ((->> value (fn args ...) rest ...)
+					; ...and rewrite it to (->> (+ 1 2 3) (/ 3)), or (->> 6 (/ 3)).
+					; Note that we just accomplished the "thread-last" part!
+					; Obviously we're not at a final value yet: (->> 6 (/ 3)) will invoke
+					; the macro again. So, we "cycle through," evaluating incrementally,
+					; until we reach a final value.
+     (->> (fn args ... value) rest ...))
+
+					; Finally, here we match a named function in the second position:
+					; e.g.. (->> 3 inc (/ 3))
+    ((->> value fn rest ...)
+					; ...and pipe it through just like we did above: (->> 4 (/ 3))
+     (->> (fn value) rest ...))))
 #+end_src
 
 * Assets
@@ -129,7 +160,7 @@
    resolved rejected
    (lambda ()
      (pk "Waiting...")
-     (init-repl)
+     ;(init-repl)
      (init (reverse script))
      (pk "Done!")
      42)))

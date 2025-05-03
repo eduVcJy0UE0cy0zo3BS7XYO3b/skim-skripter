@@ -164,7 +164,7 @@
       (cond
        ((eq? exp %invalid)
         (display "invalid Scheme expression\n"))
-          ;; Invoke the interpreter.
+       ;; Invoke the interpreter.
        (else
         (put-message prev-c2s str)
         (call-with-values (lambda ()
