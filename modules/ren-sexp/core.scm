@@ -35,7 +35,7 @@
 
 (define (init data)
   (init-settings!)
-  (define dt (/ 1000.0 60.0))  
+  (define dt (/ 1000.0 2.0))  
   (define empty-scene (make-scene))
   (define* (^state bcom)
     (define scene-history (spawn ^cell (list empty-scene)))
@@ -44,22 +44,28 @@
     (define current-history-scene (spawn ^cell (car ($ scene-history))))
     (methods
      ((current-scene)
+      (pk 'current-scene)
       ($ current-history-scene))
      ((current-story-scene)
+      (pk 'current-story-scene)
       ($ current-story-scene))
      ((append-empty-scene)
       ($ scene-history
 	 (cons empty-scene ($ scene-history))))
      ((update-current-scene updated-scene)
-      ($ current-history-scene updated-scene))
+      (pk updated-scene)
+      ($ current-history-scene updated-scene)
+      (pk 666))
      ((current-scene-completed?)
       (let ((current-scene ($ current-history-scene))
 	    (next-scene ($ current-story-scene)))
 	(equal? current-scene next-scene)))))
-  
-  (add-key-up-listener! ^state)
+
+  (define state (spawn ^state))
+  (pk ($ state 'current-scene))
+  ;; (add-key-up-listener! state)
   (define update-callback
-    (init-update ^state dt))
+    (init-update state dt))
   (then (load-font (ptsans-font))
 	(procedure->external
 	 (lambda (font)

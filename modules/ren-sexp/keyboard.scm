@@ -1,6 +1,7 @@
 (define-module (ren-sexp keyboard)
   #:use-module (ice-9 match)
   #:use-module (goblins)
+  #:use-module (goblins actor-lib let-on)
   #:use-module (dom event)
   #:use-module (dom document)
   #:use-module (hoot ffi)
@@ -11,22 +12,22 @@
   #:use-module (ren-sexp utils)
   #:export (add-key-up-listener!))
 
-(define (complete-or-begin-new-scene! ^state)
-  (let* ((current ($ ^state 'current-scene))
-	 (remote ($ ^state 'current-story-scene))
-	 (completed? ($ ^state 'current-scene-completed?)))
+(define (complete-or-begin-new-scene! state)
+  (let*-on ((current (<- state 'current-scene))
+	    (remote (<- state 'current-story-scene))
+	    (completed? (<- state 'current-scene-completed?)))
     (if completed?
-	(append-empty-scene! ^state (make-scene))
+	(append-empty-scene! state (make-scene))
 	remote)))
 
-(define (add-key-up-listener! ^state)
+(define (add-key-up-listener! state)
   (add-event-listener!
    (current-document)
    "keydown"
    (procedure->external
-    (init-keyboard ^state))))
+    (init-keyboard state))))
 
-(define (init-keyboard ^state)
+(define (init-keyboard state)
   (lambda (event)
     (let* ((key (string->symbol (keyboard-event-code event)))
 	   ;; (_ (put-message in #f))
@@ -39,6 +40,6 @@
 	;; ('Equal	(change-volume scene 0.05))
 	;; ('Minus	(change-volume scene -0.05))
 	;; ('KeyM	(mute-toggle scene))
-	('Space	(complete-or-begin-new-scene! ^state))
+	('Space	(complete-or-begin-new-scene! state))
 	(_ #t)))))					
 

@@ -182,7 +182,7 @@ window.addEventListener("load", async () => {
 		}
 	    }
 	})
-	proc.call_async();
+	// proc.call_async();
     } catch(e) {
 	if(e instanceof WebAssembly.CompileError) {
 	    document.getElementById("wasm-error").hidden = false;

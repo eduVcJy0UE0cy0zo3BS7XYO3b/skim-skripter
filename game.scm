@@ -1,17 +1,9 @@
 (use-modules
  (demo assets)
- (fibers)
- (fibers channels)
- (fibers promises)
- (hoot eval)                                        
- (hoot ffi)                                         	
- (hoot hashtables)                                  	
- ((hoot error-handling) #:select (format-exception))
+ (goblins)
+ (hoot records)
  (ice-9 match)                                      
- ;(repl-environment)                                 
  (srfi srfi-11)
- (guile)
- ;(repl)
  (ren-sexp scene)
  (ren-sexp rssl)
  (ren-sexp bg)
@@ -125,12 +117,10 @@
        (TXT     "Fine. There will be a samovar. In a week, lets gather at an interesting place near the Yeltsin Center. For now... The water is exactly the right temperature. Today we will try my raspberry tea.")
        
        (JUST	END)))
-(lambda (resolved rejected)
-  (call-with-async-result
-   resolved rejected
-   (lambda ()
-     (pk "Waiting...")
-     ;(init-repl)
-     (init (reverse script))
-     (pk "Done!")
-     42)))
+(define a-vat (spawn-vat))
+(call-with-vat
+ a-vat
+ (lambda ()
+   (pk "Waiting...")
+   (init (reverse script))
+   (pk "Done!")))

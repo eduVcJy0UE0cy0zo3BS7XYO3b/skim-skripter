@@ -1,6 +1,7 @@
 (define-module (ren-sexp update)
-  #:use-module (ice-9 match)
+  #:use-module (hoot match)
   #:use-module (goblins)
+  #:use-module (goblins actor-lib let-on)
   #:use-module (dom window)
   #:use-module (ren-sexp text)
   #:use-module (ren-sexp bg)
@@ -18,14 +19,23 @@
   (equal? (scene-ttl scene) 'inf))
 
 (define (next-scene-increment next current)
+  (define a (make-scene #:state 'a))
+  (define b (make-scene #:state 'b))
+  (match (list a b)
+    ((($ <scene> state)
+      ($ <scene> state))
+     (pk (cons b a))))
+  
   (pk (list next current))
-  (match (list next current)
+  (match (cons next current)
     ((($ <scene> state* bg* old-text*
 	 text* sprites* music* carret* ttl*)
+      .
       ($ <scene> state  bg  old-text
 	 text  sprites  music  carret  ttl))
      (cond
       ((not (same-bg? bg* bg))
+       (pk 'next-bg)
        (next-bg next current))
       ((not (same-sprites? sprites* sprites))
        (next-sprites next current))
@@ -39,23 +49,47 @@
        (next-ttl next current))
       (else next)))))
 
-(define (compute-next-state scene ^state)
-  (let* ((next ($ ^state 'current-story-scene)))
-    (if ($ ^state 'current-state-completed?)
-	(if (inf-ttl? next)
-	    scene
-	    (append-empty-scene! ^state (make-scene)))
-	(next-scene-increment next scene))))
+(define (compute-next-state state scene)
+  (let*-on ((next (<- state 'current-story-scene))
+	    (completed? (<- state 'current-scene-completed?)))
+	   (pk 8)
+	   (if completed?
+	       (if (inf-ttl? next)
+		   scene
+		   (append-empty-scene! state (make-scene)))
+	       (next-scene-increment next scene))))
 
-(define (init-update ^state dt)
-  (define draw-callback (init-draw ^state))
+(define (init-update state dt)
+  (pk 1)
+  (pk ($ state 'current-scene))
+  (pk 2)
+  (define a-vat (spawn-vat))
+
+  (define draw-callback (init-draw state))
+  ;; (call-with-vat
+  ;;  a-vat
+  ;;  (lambda ()
+     
+  ;;    1))
+  
   (define (update)
-    (let ((scene ($ ^state 'current-scene)))
-      (match (scene-state scene)
-	('play ($ ^state 'update-current-scene
-		  (compute-next-state scene ^state)))
-	(_ #t))
-      (timeout update-callback dt)
-      (request-animation-frame draw-callback)))
+    (pk 3)
+    (call-with-vat
+     a-vat
+     (lambda ()
+       (let*-on ((scene (<- state 'current-scene))
+		(_ (<- state 'update-current-scene
+		       (compute-next-state state scene)))
+		)
+	       ;; (pk scene)
+	       ;; (pk 4)
+	       ;; (match (scene-state scene)
+	       ;; 	 ('play ($ state 'update-current-scene
+	       ;; 		   (compute-next-state scene state)))
+		;; 	 (_ #t))
+		(pk 4)
+		(timeout update-callback dt)
+		;; (request-animation-frame draw-callback)
+		))))
   (define update-callback (procedure->external update))
   update-callback)

@@ -1,6 +1,7 @@
 (define-module (ren-sexp draw)
   #:use-module (ice-9 match)
   #:use-module (goblins)
+  #:use-module (goblins actor-lib let-on)
   #:use-module (dom document)
   #:use-module (dom canvas)
   #:use-module (dom element)
@@ -58,39 +59,46 @@
     (define *last-pos* (make-parameter 0))
     (define *fps-counter* (make-parameter 0))
     (define *last-time* (make-parameter 0))
+
+    (define a-vat (spawn-vat))
     
     (define (draw prev-time)
-      (let* ((scene ($ state 'current-scene))
-	     (text (scene-text scene))
-	     (old-text (scene-old-text scene))
-             (bg (scene-bg scene))
-	     (sprites (scene-sprites scene))
-	     (completed? ($ state 'current-state-completed?)))
+      (pk 6)
+      (call-with-vat
+       a-vat
+       (lambda ()
 
-	(*fps-counter* (+ (*fps-counter*) 1))
-
-	(let ((curr-second (current-second))
-	      (last-time (*last-time*)))
-	  (when (>= (- curr-second last-time) 1)
-	    (*last-time* curr-second)
-	    (draw-fps (*fps-counter*) debug-context GW GH)
-	    (*fps-counter* 0)))
-	
-	(unless completed?
-	  (draw-bg bg bg-context GW GH)
-	  (draw-sprites sprites bg-context)
-	  (clear-rect old-text-context 0.0 0.0 GW GH)
-	  (define p1
-	    (draw-old-text (reverse old-text) old-text-context 50.0))
-	  (*last-pos* p1))
-	
-	(clear-rect text-context 0.0 0.0 GW GH)
-	(clear-rect carret-context 0.0 0.0 GW GH)
-	(let* ((p2&w2 (draw-text text text-context (*last-pos*)))
-	       (p2 (car p2&w2))
-	       (w2 (cdr p2&w2)))
-	  (unless (equal? text "")
-            (draw-carret (make-carret "")
-			 carret-context p2 w2 completed?)))))
+	 (let*-on ((scene (<- state 'current-scene))
+		   (text (scene-text scene))
+		   (old-text (scene-old-text scene))
+		   (bg (scene-bg scene))
+		   (sprites (scene-sprites scene))
+		   (completed? (<- state 'current-scene-completed?)))
+		  (pk 7)
+		  (*fps-counter* (+ (*fps-counter*) 1))
+		  
+		  (let ((curr-second (current-second))
+			(last-time (*last-time*)))
+		    (when (>= (- curr-second last-time) 1)
+		      (*last-time* curr-second)
+		      (draw-fps (*fps-counter*) debug-context GW GH)
+		      (*fps-counter* 0)))
+		  
+		  (unless completed?
+		    (draw-bg bg bg-context GW GH)
+		    (draw-sprites sprites bg-context)
+		    (clear-rect old-text-context 0.0 0.0 GW GH)
+		    (define p1
+		      (draw-old-text (reverse old-text) old-text-context 50.0))
+		    (*last-pos* p1))
+		  
+		  (clear-rect text-context 0.0 0.0 GW GH)
+		  (clear-rect carret-context 0.0 0.0 GW GH)
+		  (let* ((p2&w2 (draw-text text text-context (*last-pos*)))
+			 (p2 (car p2&w2))
+			 (w2 (cdr p2&w2)))
+		    (unless (equal? text "")
+		      (draw-carret (make-carret "")
+				   carret-context p2 w2 completed?)))))))
     (define draw-callback (procedure->external draw))
     draw-callback))
