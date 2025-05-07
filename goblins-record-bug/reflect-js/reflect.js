@@ -1,5 +1,4 @@
 // -*- js2-basic-offset: 4 -*-
-
 class Char {
     constructor(codepoint) {
         this.codepoint = codepoint;

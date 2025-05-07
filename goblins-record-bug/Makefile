@@ -1,4 +1,4 @@
-HOOT_LP=/gnu/store/9vm4izgsp0g007d82zgmrvg9zczkxjxj-profile/share/guile-hoot/0.6.0/lib:/gnu/store/9vm4izgsp0g007d82zgmrvg9zczkxjxj-profile/share/guile/3.0
+HOOT_LP=/gnu/store/y23m1wfm78jc5pr2vxh3fzdyx7xybl6r-profile/share/guile-hoot/0.6.1/lib:/gnu/store/y23m1wfm78jc5pr2vxh3fzdyx7xybl6r-profile/share/guile/3.0
 
 GOBLINS_PATH=/gnu/store/q4648183qkl43ky8yp3qqikv63j67dw7-guile-goblins-0.15.1/share/guile/site/3.0
 
