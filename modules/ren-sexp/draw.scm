@@ -38,7 +38,7 @@
   (set-shadow-offset-x! context 5)
   (set-shadow-offset-y! context 5))
 
-(define (init-draw state)
+(define (init-draw state VAT)
   (let ((carret-context (make-2d-context "carret-canvas"))
 	(bg-context (make-2d-context "all-canvas"))
 	(gray-context (make-2d-context "gray-canvas"))
@@ -59,23 +59,18 @@
     (define *last-pos* (make-parameter 0))
     (define *fps-counter* (make-parameter 0))
     (define *last-time* (make-parameter 0))
-
-    (define a-vat (spawn-vat))
-    
     (define (draw prev-time)
-      (pk 6)
       (call-with-vat
-       a-vat
+       VAT
        (lambda ()
-
-	 (let*-on ((scene (<- state 'current-scene))
-		   (text (scene-text scene))
-		   (old-text (scene-old-text scene))
-		   (bg (scene-bg scene))
-		   (sprites (scene-sprites scene))
-		   (completed? (<- state 'current-scene-completed?)))
-		  (pk 7)
-		  (*fps-counter* (+ (*fps-counter*) 1))
+	 (let-on ((scene (<- state 'current-scene))
+		  (next (<- state 'current-story-scene)))
+		 (define completed? (equal? scene next))
+		 (define text (scene-text scene))
+		 (define old-text (scene-old-text scene))
+		 (define bg (scene-bg scene))
+		 (define sprites (scene-sprites scene))
+		 (*fps-counter* (+ (*fps-counter*) 1))
 		  
 		  (let ((curr-second (current-second))
 			(last-time (*last-time*)))
@@ -83,7 +78,7 @@
 		      (*last-time* curr-second)
 		      (draw-fps (*fps-counter*) debug-context GW GH)
 		      (*fps-counter* 0)))
-		  
+
 		  (unless completed?
 		    (draw-bg bg bg-context GW GH)
 		    (draw-sprites sprites bg-context)
@@ -91,14 +86,17 @@
 		    (define p1
 		      (draw-old-text (reverse old-text) old-text-context 50.0))
 		    (*last-pos* p1))
-		  
+
 		  (clear-rect text-context 0.0 0.0 GW GH)
 		  (clear-rect carret-context 0.0 0.0 GW GH)
 		  (let* ((p2&w2 (draw-text text text-context (*last-pos*)))
 			 (p2 (car p2&w2))
 			 (w2 (cdr p2&w2)))
+
 		    (unless (equal? text "")
 		      (draw-carret (make-carret "")
-				   carret-context p2 w2 completed?)))))))
+				   carret-context p2 w2 completed?))
+		    1
+		    )))))
     (define draw-callback (procedure->external draw))
     draw-callback))

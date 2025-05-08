@@ -12,7 +12,6 @@
 * Imports
 #+name: imports
 #+begin_src scheme
-
 (use-modules
  (demo assets)
  (goblins)
@@ -147,11 +146,11 @@
 * Init
 #+name: init
 #+begin_src scheme
-(define a-vat (spawn-vat))
+(define VAT (spawn-vat))
 (call-with-vat
- a-vat
+ VAT
  (lambda ()
    (pk "Waiting...")
-   (init (reverse script))
+   (init (reverse script) VAT)
    (pk "Done!")))
 #+end_src

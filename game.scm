@@ -117,10 +117,10 @@
        (TXT     "Fine. There will be a samovar. In a week, lets gather at an interesting place near the Yeltsin Center. For now... The water is exactly the right temperature. Today we will try my raspberry tea.")
        
        (JUST	END)))
-(define a-vat (spawn-vat))
+(define VAT (spawn-vat))
 (call-with-vat
- a-vat
+ VAT
  (lambda ()
    (pk "Waiting...")
-   (init (reverse script))
+   (init (reverse script) VAT)
    (pk "Done!")))

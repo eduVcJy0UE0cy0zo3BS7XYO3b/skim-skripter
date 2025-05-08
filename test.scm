@@ -1,5 +1,5 @@
 (use-modules
- (goblins)
+ ((goblins) #:select ($) #:prefix g:)
  (hoot records)
  (ice-9 match))
 
@@ -7,7 +7,6 @@
   (make-foo bar)
   foo?
   (bar foo-bar))
-
 
 (match (list (make-foo 1) (make-foo 2))
   ((($ <foo> bar)

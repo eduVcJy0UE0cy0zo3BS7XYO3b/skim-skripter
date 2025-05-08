@@ -33,9 +33,9 @@
    "PTSans"
    "url(resources/fonts/PT_Sans/PTSans-Regular.ttf)"))
 
-(define (init data)
+(define (init data VAT)
   (init-settings!)
-  (define dt (/ 1000.0 2.0))  
+  (define dt (/ 1000.0 30.0))  
   (define empty-scene (make-scene))
   (define* (^state bcom)
     (define scene-history (spawn ^cell (list empty-scene)))
@@ -44,28 +44,24 @@
     (define current-history-scene (spawn ^cell (car ($ scene-history))))
     (methods
      ((current-scene)
-      (pk 'current-scene)
       ($ current-history-scene))
      ((current-story-scene)
-      (pk 'current-story-scene)
       ($ current-story-scene))
      ((append-empty-scene)
       ($ scene-history
 	 (cons empty-scene ($ scene-history))))
-     ((update-current-scene updated-scene)
-      (pk updated-scene)
-      ($ current-history-scene updated-scene)
-      (pk 666))
      ((current-scene-completed?)
       (let ((current-scene ($ current-history-scene))
 	    (next-scene ($ current-story-scene)))
-	(equal? current-scene next-scene)))))
-
+	(equal? current-scene next-scene)))
+     ((update-current-scene updated-scene)
+      ($ current-history-scene updated-scene)
+      1)))
+  
   (define state (spawn ^state))
-  (pk ($ state 'current-scene))
   ;; (add-key-up-listener! state)
   (define update-callback
-    (init-update state dt))
+    (init-update state dt VAT))
   (then (load-font (ptsans-font))
 	(procedure->external
 	 (lambda (font)
