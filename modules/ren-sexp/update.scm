@@ -39,42 +39,23 @@
        (next-ttl next current))
       (else next)))))
 
-(define (compute-next-state state scene)
-  (let*-on ((next (g:<- state 'current-story-scene))
-	    (completed? (g:<- state 'current-scene-completed?)))
-	   (if completed?
-	       (if (inf-ttl? next)
-		   scene
-		   (append-empty-scene! state (make-scene)))
-	       (next-scene-increment next scene))))
+(define (compute-next-state state scene next)
+  (if (equal? scene next)
+      (if (inf-ttl? next)
+	  scene
+	  (append-empty-scene! state scene next (make-scene)))
+      (next-scene-increment next scene)))
 
 (define (init-update state dt VAT)
-  (pk 1)
-  (pk (g:$ state 'current-scene))
-  (pk 2)
-
   (define draw-callback (init-draw state VAT))
-  ;; (call-with-vat
-  ;;  a-vat
-  ;;  (lambda ()
-     
-  ;;    1))
-  
   (define (update)
     (g:call-with-vat
      VAT
      (lambda ()
-       (let*-on ((scene (g:<- state 'current-scene))
-		 (resul (g:<- state 'update-current-scene (compute-next-state state scene)))
-		 )
-		;; (pk scene)
-		;; (pk 4)
-		;; (match (scene-state scene)
-		;; 	 ('play ($ state 'update-current-scene
-		;; 		   (compute-next-state scene state)))
-		;; 	 (_ #t))
+       (let*-on ((scene (g:$ state 'current-scene))
+		 (next  (g:$ state 'current-story-scene))
+		 (resul (g:$ state 'update-current-scene (compute-next-state state scene next))))
 		(request-animation-frame draw-callback)
-		(timeout update-callback dt)
-		))))
+		(timeout update-callback dt)))))
   (define update-callback (procedure->external update))
   update-callback)

@@ -13,11 +13,11 @@
   #:export (add-key-up-listener!))
 
 (define (complete-or-begin-new-scene! state)
-  (let*-on ((current (<- state 'current-scene))
-	    (remote (<- state 'current-story-scene))
-	    (completed? (<- state 'current-scene-completed?)))
+  (let*-on ((current ($ state 'current-scene))
+	    (remote ($ state 'current-story-scene))
+	    (completed? ($ state 'current-scene-completed?)))
     (if completed?
-	(append-empty-scene! state (make-scene))
+	(append-empty-scene! state current remote (make-scene))
 	remote)))
 
 (define (add-key-up-listener! state)

@@ -63,8 +63,8 @@
       (call-with-vat
        VAT
        (lambda ()
-	 (let-on ((scene (<- state 'current-scene))
-		  (next (<- state 'current-story-scene)))
+	 (let-on ((scene ($ state 'current-scene))
+		  (next ($ state 'current-story-scene)))
 		 (define completed? (equal? scene next))
 		 (define text (scene-text scene))
 		 (define old-text (scene-old-text scene))

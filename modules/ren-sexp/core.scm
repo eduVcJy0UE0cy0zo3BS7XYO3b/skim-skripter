@@ -35,7 +35,7 @@
 
 (define (init data VAT)
   (init-settings!)
-  (define dt (/ 1000.0 30.0))  
+  (define dt (/ 1000.0 60.0))  
   (define empty-scene (make-scene))
   (define* (^state bcom)
     (define scene-history (spawn ^cell (list empty-scene)))
