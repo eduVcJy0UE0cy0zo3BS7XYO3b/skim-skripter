@@ -40,22 +40,22 @@
   (define* (^state bcom)
     (define scene-history (spawn ^cell (list empty-scene)))
     (define story-list (spawn ^cell data))
-    (define current-story-scene (spawn ^cell (car ($ story-list))))
-    (define current-history-scene (spawn ^cell (car ($ scene-history))))
+    (define current-story-scene (car ($ story-list)))
+    (define current-history-scene (car ($ scene-history)))
     (methods
-     ((current-scene)
-      ($ current-history-scene))
-     ((current-story-scene)
-      ($ current-story-scene))
-     ((append-empty-scene)
-      ($ scene-history
-	 (cons empty-scene ($ scene-history))))
-     ((current-scene-completed?)
-      (let ((current-scene ($ current-history-scene))
-	    (next-scene ($ current-story-scene)))
-	(equal? current-scene next-scene)))
+     ((current-scene) current-history-scene)
+     ((current-story-scene) current-story-scene)
+     
+     ;; ((append-empty-scene)
+     ;;  ($ scene-history
+     ;; 	 (cons empty-scene ($ scene-history))))
+     ;; ((current-scene-completed?)
+     ;;  (let ((current-scene current-history-scene)
+     ;; 	    (next-scene current-story-scene))
+     ;; 	(equal? current-scene next-scene)))
+
      ((update-current-scene updated-scene)
-      ($ current-history-scene updated-scene)
+      (set! current-history-scene updated-scene)
       1)))
   
   (define state (spawn ^state))
