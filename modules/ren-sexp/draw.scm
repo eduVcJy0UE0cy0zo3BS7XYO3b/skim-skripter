@@ -29,17 +29,16 @@
 
 ;; Оптимизированная функция настройки текстового контекста
 (define (setup-text-context! context)
-  ;; Минимальные настройки для лучшей производительности
+  ;; Возвращаем эффекты для текста
   (set-fill-color! context "#ffffff")
-  ;; Убираем потенциально медленные настройки:
-  ;; (set-border-color! context "black")     ; ← может вызывать strokeText
-  (set-font! context "45px PTSans")           ; ← убрали bold
-  ;; (set-text-align! context "left")        ; ← left по умолчанию
-  ;; Shadow отключён для производительности:
-  ;; (set-shadow-blur! context 2)
-  ;; (set-shadow-color! context "rgba(0,0,0,0.3)")
-  ;; (set-shadow-offset-x! context 5)
-  ;; (set-shadow-offset-y! context 5)
+  (set-border-color! context "black")
+  (set-font! context "bold 45px PTSans")      ; ← вернули bold
+  (set-text-align! context "left")
+  ;; Возвращаем shadow эффекты:
+  (set-shadow-blur! context 2)
+  (set-shadow-color! context "rgba(0,0,0,0.3)")
+  (set-shadow-offset-x! context 5)
+  (set-shadow-offset-y! context 5)
   )
 
 (define (init-draw state-box)
@@ -147,7 +146,7 @@
     (define *cached-bg* (make-parameter #f))
     (define *cached-sprites* (make-parameter '()))
     (define *cached-reversed-old-text* (make-parameter '()))
-    (define (draw prev-time)
+    (define (draw prev-time update-time draw-time)
       (let* ((state (atomic-box-ref state-box))
              (scene (assoc-ref state 'current-scene))
 	     (next  (assoc-ref state 'current-story-scene)))
@@ -173,7 +172,7 @@
 	      (last-time (*last-time*)))
 	  (when (>= (- curr-second last-time) 1)
 	    (*last-time* curr-second)
-	    (draw-fps (*fps-counter*) debug-context GW GH)
+	    (draw-performance-info (*fps-counter*) update-time draw-time debug-context GW GH)
 	    (*fps-counter* 0)))
 
 	;; (unless completed?

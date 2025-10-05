@@ -39,7 +39,7 @@
     (make-atomic-box `((current-scene . ,(make-scene))
                        (current-story-scene . ,(car data))
                        (counter . 0))))
-  (define update-and-draw-callback (init-update state-box #f))
+  (define update-and-draw-callback (init-update state-box))
   (add-key-up-listener! state-box)
   (then (load-font (ptsans-font))
 	(procedure->external
