@@ -31,13 +31,11 @@
        (cond
         ((and (music? music)
               (not music*))
-         (pk 'pause-music)
          (media-pause (music-audio music))
          (scene-update-music current music*))
 
         ((and (not music)
               (music? music*))
-         (pk 'play-music)
          (media-play (music-audio music*))
          (set-media-loop! (music-audio music*) 1)
          (scene-update-music current music*))))

@@ -1,7 +1,5 @@
 (use-modules
- (fibers promises)
  (demo assets)
- (goblins)
  (hoot records)
  (ice-9 match)
  (srfi srfi-11)
@@ -120,13 +118,9 @@
 
        (JUST	END)))
 
-(pk 0)
-
 (lambda (resolved rejected)
   (call-with-async-result
    resolved rejected
    (lambda ()
-     (pk "Waiting...")
      (init (reverse script))
-     (pk "Done!")
      42)))

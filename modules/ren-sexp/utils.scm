@@ -1,82 +1,19 @@
 (define-module (ren-sexp utils)
   #:use-module (ice-9 match)
   #:use-module (ice-9 atomic)
-  #:use-module (fibers channels)
-  #:use-module (hoot records)
-  #:use-module (fibers)
   #:use-module (hoot ffi)
   #:export (string-split
             find-replace
             set-data!
-            update-current-scene
-            append-scene
-            make-box
-            box-ref
-            box-set!
             atomic-update-current-scene
             atomic-append-scene))
 
-(define-record-type <box>
-  (make-box-internal channel)
-  box?
-  (channel box-channel))
-
-(define (box-manager channel current-value)
-  (let loop ((value current-value))
-    (match (get-message channel)
-      ;; Операция чтения
-      (('get reply-channel)
-       (put-message reply-channel value)
-       (loop value))
-
-      ;; Операция записи
-      (('set new-value reply-channel)
-       (put-message reply-channel 'ok)
-       (loop new-value))
-
-      ;; Операция обновления с функцией
-      (('update proc reply-channel)
-       (let ((new-value (proc value)))
-         (put-message reply-channel new-value)
-         (loop new-value))))))
-
-;; Чтение значения из коробки
-(define (box-ref box)
-  (let ((reply-channel (make-channel)))
-    (put-message (box-channel box) `(get ,reply-channel))
-    (get-message reply-channel)))
-
-;; Запись значения в коробку
-(define (box-set! box new-value)
-  (let ((reply-channel (make-channel)))
-    (put-message (box-channel box) `(set ,new-value ,reply-channel))
-    (get-message reply-channel)
-    new-value))
-
-;; Создание новой коробки со значением
-(define (make-box initial-value)
-  (let ((ch (make-channel)))
-    ;; Запускаем fiber для управления состоянием коробки
-    (spawn-fiber
-     (lambda ()
-       (box-manager ch initial-value)))
-    (make-box-internal ch)))
 
 (define DATA 1)
 
 (define (set-data! data)
   (set! DATA data))
 
-(define (update-current-scene state-box updated-scene)
-  (let* ((state (box-ref state-box))
-         (scene (assoc-ref state 'current-scene))
-	 (next  (assoc-ref state 'current-story-scene))
-         (counter  (assoc-ref state 'counter)))
-    (define state* `((current-story-scene . ,next)
-                     (current-scene . ,updated-scene)
-                     (counter . ,counter)))
-    (box-set! state-box state*)
-    state*))
 
 (define (atomic-update-current-scene state-box updated-scene)
   (let* ((state (atomic-box-ref state-box))
@@ -90,15 +27,6 @@
     state*))
 
 
-(define (append-scene state-box new-scene)
-  (let* ((state (box-ref state-box))
-         (counter  (assoc-ref state 'counter))
-         (counter* (+ 1 counter)))
-    (define state* `((current-story-scene . ,(list-ref DATA counter*))
-                     (current-scene . ,new-scene)
-                     (counter . ,counter*)))
-    (box-set! state-box state*)
-    new-scene))
 
 (define (atomic-append-scene state-box new-scene)
   (let* ((state (atomic-box-ref state-box))

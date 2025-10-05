@@ -33,7 +33,6 @@
    "url(resources/fonts/PT_Sans/PTSans-Regular.ttf)"))
 
 (define (init data)
-  (pk 1)
   (define dt (/ 1000.0 70.0))
   (init-settings!)
   (set-data! data)

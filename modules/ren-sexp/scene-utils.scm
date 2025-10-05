@@ -8,8 +8,6 @@
   #:export (append-empty-scene!))
 
 (define (append-empty-scene! state-box scene next empty-scene)
-  (pk scene)
-  (pk next)
   (let* ((curr-bg (scene-bg scene))
 	 (next-bg (scene-bg next))
 

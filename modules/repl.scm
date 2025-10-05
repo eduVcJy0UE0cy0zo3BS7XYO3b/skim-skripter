@@ -119,7 +119,7 @@
 (define (*log* in out)
   (let lp ((log '("Welcome to the Hoot REPL!
 ")))
-    (match (pk 'data-is (get-message in))
+    (match (get-message in))
       (#f (put-message out (reverse log)))
       (data (lp (cons data log))))
     (lp log)))
@@ -366,7 +366,6 @@
                                  (sxml->dom new)))))))))))))
 
 (define (refresh!)
-  (pk 'refresh)
   (let ((new-vdom (render)))
     (put-message vdom-c2s #f)
     (virtual-dom-render (document-body) (get-message vdom-s2c) new-vdom)
