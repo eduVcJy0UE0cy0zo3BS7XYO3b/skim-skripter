@@ -27,7 +27,9 @@
     (set-element-height! canvas (exact height))
     context))
 
-(define (set-font context)
+;; Оптимизированная функция настройки текстового контекста
+(define (setup-text-context! context)
+  ;; Группируем все настройки текста в одном месте
   (set-fill-color! context "#ffffff")
   (set-border-color! context "black")
   (set-font! context "bold 45px PTSans")
@@ -44,14 +46,19 @@
 	(debug-context (make-2d-context "debug-canvas"))
 	(GW   1920.0)
 	(GH   1080.0))
+    ;; Настройка gray-context для полупрозрачного оверлея
     (set-fill-color! gray-context "black")
     (set-alpha! gray-context 0.3)
     (fill-rect gray-context 0 0 GW GH)
-    (set-font text-context)
-    (set-font debug-context)
+    
+    ;; Оптимизированная настройка текстовых контекстов
+    (setup-text-context! text-context)
+    (setup-text-context! debug-context)
     (define *last-pos* (make-parameter 0))
     (define *fps-counter* (make-parameter 0))
     (define *last-time* (make-parameter 0))
+    ;; Оптимизация: создаём объект каретки один раз
+    (define *carret-obj* (make-carret ""))
     (define (draw prev-time)
       (let* ((state (atomic-box-ref state-box))
              (scene (assoc-ref state 'current-scene))
@@ -78,14 +85,16 @@
 	  (draw-old-text (reverse old-text) text-context 50.0))
 	(*last-pos* p1)
                                         ;)
+
 	(let* ((p2&w2 (draw-text text text-context (*last-pos*)))
 	       (p2 (car p2&w2))
 	       (w2 (cdr p2&w2)))
 
 	  (unless (equal? text "")
-	    (draw-carret (make-carret "")
+	    (draw-carret *carret-obj*
 			 text-context p2 w2 completed?))
 	  1
-	  )))
+	  )
+	1))
     (define draw-callback (procedure->external draw))
     draw-callback))
