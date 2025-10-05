@@ -61,6 +61,9 @@
     (define *last-time* (make-parameter 0))
     ;; Оптимизация: создаём объект каретки один раз
     (define *carret-obj* (make-carret ""))
+    ;; Параметры анимации каретки
+    (define *carret-animation-time* (make-parameter 0))
+    (define *carret-fade-direction* (make-parameter 1)) ; 1 = fade in, -1 = fade out
     ;; Кэширование scene вычислений
     (define *cached-scene* (make-parameter #f))
     (define *cached-text* (make-parameter ""))
@@ -111,8 +114,28 @@
 	       (w2 (cdr p2&w2)))
 
 	  (unless (equal? text "")
-	    (draw-carret *carret-obj*
-			 text-context p2 w2 completed?))
+	    ;; Обновление анимации каретки
+	    (let ((anim-time (*carret-animation-time*))
+	          (direction (*carret-fade-direction*)))
+	      ;; Увеличиваем время анимации (0.02 = ~50 FPS анимации)
+	      (define new-time (+ anim-time (* direction 0.02)))
+	      ;; Ограничиваем между 0 и 1
+	      (cond
+	        ((>= new-time 1.0) 
+	         (*carret-animation-time* 1.0)
+	         (*carret-fade-direction* -1)) ; Начинаем fade out
+	        ((<= new-time 0.0)
+	         (*carret-animation-time* 0.0)
+	         (*carret-fade-direction* 1))  ; Начинаем fade in
+	        (else
+	         (*carret-animation-time* new-time)))
+	      
+	      ;; Отрисовка с альфа-каналом
+	      (context-save! text-context)
+	      (set-alpha! text-context (*carret-animation-time*))
+	      (draw-carret *carret-obj*
+	                   text-context p2 w2 completed?)
+	      (context-restore! text-context)))
 	  1
 	  )
 	1))
@@ -139,6 +162,9 @@
     (define *last-time* (make-parameter 0))
     ;; Оптимизация: создаём объект каретки один раз
     (define *carret-obj* (make-carret ""))
+    ;; Параметры анимации каретки
+    (define *carret-animation-time* (make-parameter 0))
+    (define *carret-fade-direction* (make-parameter 1)) ; 1 = fade in, -1 = fade out
     ;; Кэширование scene вычислений
     (define *cached-scene* (make-parameter #f))
     (define *cached-text* (make-parameter ""))
@@ -189,8 +215,28 @@
 	       (w2 (cdr p2&w2)))
 
 	  (unless (equal? text "")
-	    (draw-carret *carret-obj*
-			 text-context p2 w2 completed?))
+	    ;; Обновление анимации каретки
+	    (let ((anim-time (*carret-animation-time*))
+	          (direction (*carret-fade-direction*)))
+	      ;; Увеличиваем время анимации (0.02 = ~50 FPS анимации)
+	      (define new-time (+ anim-time (* direction 0.02)))
+	      ;; Ограничиваем между 0 и 1
+	      (cond
+	        ((>= new-time 1.0) 
+	         (*carret-animation-time* 1.0)
+	         (*carret-fade-direction* -1)) ; Начинаем fade out
+	        ((<= new-time 0.0)
+	         (*carret-animation-time* 0.0)
+	         (*carret-fade-direction* 1))  ; Начинаем fade in
+	        (else
+	         (*carret-animation-time* new-time)))
+	      
+	      ;; Отрисовка с альфа-каналом
+	      (context-save! text-context)
+	      (set-alpha! text-context (*carret-animation-time*))
+	      (draw-carret *carret-obj*
+	                   text-context p2 w2 completed?)
+	      (context-restore! text-context)))
 	  1
 	  )
 	1))

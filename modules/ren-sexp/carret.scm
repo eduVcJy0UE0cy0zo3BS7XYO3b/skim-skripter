@@ -36,9 +36,7 @@
      ;; (context-save! context)
      ;; (set-alpha! context (/ alpha 1000.0))
      (fill-text context
-		(if completed?
-		    (if (even? (current-second)) "▢" "")
-		    "▷")
+		(if completed? "▢" "▷")
 		(+ 470.0 20 text-width)
 		(- padding-top 50.0))
      ;; (context-restore! context)
