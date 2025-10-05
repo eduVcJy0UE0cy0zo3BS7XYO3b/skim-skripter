@@ -1,8 +1,9 @@
 (use-modules
+ (fibers promises)
  (demo assets)
  (goblins)
  (hoot records)
- (ice-9 match)                                      
+ (ice-9 match)
  (srfi srfi-11)
  (ren-sexp scene)
  (ren-sexp rssl)
@@ -40,6 +41,7 @@
     ((->> value fn rest ...)
 					; ...and pipe it through just like we did above: (->> 4 (/ 3))
      (->> (fn value) rest ...))))
+
 (define WELCOME
   (make-scene
    #:bg (black-screen)
@@ -79,13 +81,13 @@
        (JOIN	(list masha:normal nastya:tired))
        (UPDATE	masha:normal masha:happy)
        (TXT	"And here the water is ready.")
-
+       (CLEAN)
        (UPDATE	nastya:tired nastya:normal)
        (+TXT	"My patience has ended!")
 
        (UPDATE	masha:happy masha:troubled)
        (+TXT	"Wait a little bit longer, please.")
-       
+
        (UPDATE	nastya:normal nastya:tired)
        (+TXT     "I don't want to wait, pour it faster.")
 
@@ -115,12 +117,16 @@
 
        (UPDATE	masha:troubled masha:happy)
        (TXT     "Fine. There will be a samovar. In a week, lets gather at an interesting place near the Yeltsin Center. For now... The water is exactly the right temperature. Today we will try my raspberry tea.")
-       
+
        (JUST	END)))
-(define VAT (spawn-vat))
-(call-with-vat
- VAT
- (lambda ()
-   (pk "Waiting...")
-   (init (reverse script) VAT)
-   (pk "Done!")))
+
+(pk 0)
+
+(lambda (resolved rejected)
+  (call-with-async-result
+   resolved rejected
+   (lambda ()
+     (pk "Waiting...")
+     (init (reverse script))
+     (pk "Done!")
+     42)))

@@ -83,7 +83,7 @@
      (set-alpha! context (/ alpha 1000.0))
      (define pos* (position->point pos))
      (define dx (car pos*))
-     (define dy (cdr pos*))       
+     (define dy (cdr pos*))
      (draw-image-simple context
 			img
 			dx
@@ -107,12 +107,12 @@
 	result
 	(let* ((curr-sprite (car curr-sprites))
 	       (next-sprite-name (sprite-in-scene? curr-sprite next-sprites)))
-	  (pk next-sprite-name)
 	  (if next-sprite-name
 	      (%get-same-sprites (cdr curr-sprites) (cons (get-sprite-by-name next-sprite-name next-sprites) result))
 	      (%get-same-sprites (cdr curr-sprites) result)))))
   (%get-same-sprites curr-sprites '()))
 
 (define (include-sprites next-scene curr-sprites next-sprites)
+  ;; (pk 98765)
   (let ((same-sprites (get-same-sprites curr-sprites next-sprites)))
     (scene-update-sprites next-scene same-sprites)))

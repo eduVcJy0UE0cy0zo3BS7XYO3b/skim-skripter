@@ -32,13 +32,13 @@ test.wasm: test.scm $(modules)
 	HOOT_LOAD_PATH=$(HOOT_LP) guild compile-wasm --run -L $(GOBLINS_PATH)  -L modules -L . -o $@ $<
 
 game.wasm: game.scm $(modules)
-	HOOT_LOAD_PATH=$(HOOT_LP) guild compile-wasm -L $(GOBLINS_PATH)  -L modules -L . -o $@ $<
+	HOOT_LOAD_PATH=$(HOOT_LP) guild compile-wasm --async -L $(GOBLINS_PATH)  -L modules -L . -o $@ $<
 
 game.scm: game.org
 	emacs --batch --eval "(require 'org)" --eval '(org-babel-tangle-file "game.org")'
 
 serve: game.wasm
-	guix shell python -- python3 -m http.server
+	guix shell python -- python3 -m http.server 8081
 	guile -c '((@ (hoot web-server) serve))'
 
 bundle: game.wasm

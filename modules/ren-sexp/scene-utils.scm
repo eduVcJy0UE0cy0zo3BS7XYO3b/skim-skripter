@@ -1,31 +1,32 @@
 (define-module (ren-sexp scene-utils)
   #:use-module (ren-sexp sprites)
-  #:use-module (goblins actor-lib let-on)
   #:use-module (fibers channels)
   #:use-module (ren-sexp scene)
   #:use-module (ren-sexp bg)
   #:use-module (ren-sexp music)
   #:use-module (ren-sexp utils)
-  #:use-module (goblins)
   #:export (append-empty-scene!))
 
-(define (append-empty-scene! state scene next empty-scene)
+(define (append-empty-scene! state-box scene next empty-scene)
+  (pk scene)
+  (pk next)
   (let* ((curr-bg (scene-bg scene))
 	 (next-bg (scene-bg next))
-	 
+
 	 (curr-sprites (scene-sprites scene))
 	 (next-sprites (scene-sprites next))
-	 
+
 	 (curr-music (scene-music scene))
 	 (next-music (scene-music next))
-	 
-	 (next-scene1
+
+	 (with-bg
 	  (include-bg empty-scene curr-bg next-bg))
 
-	 (next-scene2
-	  (include-sprites next-scene1 curr-sprites next-sprites))
-	 
-	 (next-scene3
-	  (include-music next-scene2 curr-music next-music)))
-    
-    (cons next-scene3 state)))
+	 (with-sprites
+	  (include-sprites with-bg curr-sprites next-sprites))
+
+	 (with-music
+	  (include-music with-sprites curr-music next-music))
+         )
+
+    (atomic-append-scene state-box with-music)))

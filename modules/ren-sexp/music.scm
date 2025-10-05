@@ -36,7 +36,7 @@
   (match music
     (($ <music> audio volume)
      (make-music audio volume*))))
-  
+
 (define (inc-volume src-music dst-music)
   (if (not (music? dst-music))
       (make-music (music-audio src-music) 0)
@@ -84,10 +84,12 @@
     audio))
 
 (define (include-music next-scene curr-music next-music)
+  (pk curr-music)
+  (pk next-music)
   (cond
    ((and (not next-music)
 	 (not curr-music))
-    (pk 1)
+    (pk 13213)
     next-scene)
 
    ((and (music? next-music)
@@ -105,12 +107,12 @@
     (set-media-volume! (music-audio curr-music) next-volume)
     (define music* (update-music-volume curr-music next-volume))
     (scene-update-music next-scene music*))
-   
+
    ((and (not next-music) (music? curr-music))
     (pk 4)
     (media-pause (music-audio curr-music))
     next-scene)
-   
+
    ((and (music? next-music) (not curr-music))
     (pk 5)
     (media-play (set-current-volume (music-audio next-music)))

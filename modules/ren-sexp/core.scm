@@ -1,8 +1,5 @@
 (define-module (ren-sexp core)
   #:use-module (dom media)
-  #:use-module (goblins)
-  #:use-module (goblins actor-lib cell)
-  #:use-module (goblins actor-lib methods)
   #:use-module (dom element)
   #:use-module (dom document)
   #:use-module (dom window)
@@ -12,7 +9,9 @@
   #:use-module (repl-environment)
   #:use-module (fibers channels)
   #:use-module (ice-9 match)
+  #:use-module (ice-9 atomic)
   #:use-module (ren-sexp settings)
+  #:use-module (ren-sexp utils)
   #:use-module (ren-sexp scene)
   #:use-module (ren-sexp bg)
   #:use-module (ren-sexp sprites)
@@ -33,35 +32,17 @@
    "PTSans"
    "url(resources/fonts/PT_Sans/PTSans-Regular.ttf)"))
 
-(define (init data VAT)
+(define (init data)
+  (pk 1)
+  (define dt (/ 1000.0 70.0))
   (init-settings!)
-  (define dt (/ 1000.0 60.0))  
-  (define empty-scene (make-scene))
-  (define* (^state bcom)
-    (define scene-history (spawn ^cell (list empty-scene)))
-    (define story-list (spawn ^cell data))
-    (define current-story-scene (car ($ story-list)))
-    (define current-history-scene (car ($ scene-history)))
-    (methods
-     ((current-scene) current-history-scene)
-     ((current-story-scene) current-story-scene)
-     
-     ;; ((append-empty-scene)
-     ;;  ($ scene-history
-     ;; 	 (cons empty-scene ($ scene-history))))
-     ;; ((current-scene-completed?)
-     ;;  (let ((current-scene current-history-scene)
-     ;; 	    (next-scene current-story-scene))
-     ;; 	(equal? current-scene next-scene)))
-
-     ((update-current-scene updated-scene)
-      (set! current-history-scene updated-scene)
-      1)))
-  
-  (define state (spawn ^state))
-  ;; (add-key-up-listener! state)
-  (define update-callback
-    (init-update state dt VAT))
+  (set-data! data)
+  (define state-box
+    (make-atomic-box `((current-scene . ,(make-scene))
+                       (current-story-scene . ,(car data))
+                       (counter . 0))))
+  (define update-callback (init-update state-box dt))
+  (add-key-up-listener! state-box)
   (then (load-font (ptsans-font))
 	(procedure->external
 	 (lambda (font)

@@ -61,9 +61,11 @@
 (define (bg-update-alpha bg alpha*)
   (match bg
     (($ <bg> img alpha)
-     (%make-bg img alpha*))))
+     (%make-bg img alpha*))
+    (_ #f)))
 
 (define (include-bg scene curr next)
+  ;; (pk 54321)
   (if (equal? curr next)
       (scene-update-bg scene curr)
       scene))
