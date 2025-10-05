@@ -1,5 +1,6 @@
 (use-modules
  (demo assets)
+ (fibers promises)
  (hoot records)
  (ice-9 match)
  (srfi srfi-11)

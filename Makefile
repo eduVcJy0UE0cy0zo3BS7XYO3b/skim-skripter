@@ -2,6 +2,9 @@ HOOT_LP=/gnu/store/9vm4izgsp0g007d82zgmrvg9zczkxjxj-profile/share/guile-hoot/0.6
 
 GOBLINS_PATH=/gnu/store/q4648183qkl43ky8yp3qqikv63j67dw7-guile-goblins-0.15.1/share/guile/site/3.0
 
+# GUILD=/gnu/store/h47jzdgll17fp17vwqjp70knc329z182-profile/bin/guild
+GUILD=guild
+
 modules = \
   modules/dom/canvas.scm \
   modules/dom/document.scm \
@@ -29,10 +32,10 @@ modules = \
   modules/ren-sexp/utils.scm
 
 test.wasm: test.scm $(modules)
-	HOOT_LOAD_PATH=$(HOOT_LP) guild compile-wasm --run -L $(GOBLINS_PATH)  -L modules -L . -o $@ $<
+	HOOT_LOAD_PATH=$(HOOT_LP) $(GUILD) compile-wasm --run -L $(GOBLINS_PATH)  -L modules -L . -o $@ $<
 
 game.wasm: game.scm $(modules)
-	HOOT_LOAD_PATH=$(HOOT_LP) guild compile-wasm --async -L $(GOBLINS_PATH)  -L modules -L . -o $@ $<
+	HOOT_LOAD_PATH=$(HOOT_LP) guix shell guile-next guile-hoot -- $(GUILD) compile-wasm --async -L $(GOBLINS_PATH)  -L modules -L . -o $@ $<
 
 game.scm: game.org
 	emacs --batch --eval "(require 'org)" --eval '(org-babel-tangle-file "game.org")'

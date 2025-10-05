@@ -33,17 +33,16 @@
    "url(resources/fonts/PT_Sans/PTSans-Regular.ttf)"))
 
 (define (init data)
-  (define dt (/ 1000.0 70.0))
   (init-settings!)
   (set-data! data)
   (define state-box
     (make-atomic-box `((current-scene . ,(make-scene))
                        (current-story-scene . ,(car data))
                        (counter . 0))))
-  (define update-callback (init-update state-box dt))
+  (define update-and-draw-callback (init-update state-box #f))
   (add-key-up-listener! state-box)
   (then (load-font (ptsans-font))
 	(procedure->external
 	 (lambda (font)
 	   (add-font! font)
-	   (timeout update-callback dt)))))
+	   (request-animation-frame update-and-draw-callback)))))

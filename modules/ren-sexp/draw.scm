@@ -16,7 +16,7 @@
   #:use-module (fibers channels)
   #:use-module (hoot ffi)
   #:use-module (ren-sexp utils)
-  #:export (init-draw))
+  #:export (init-draw init-draw-function))
 
 (define (make-2d-context elem)
   (let* ((canvas (get-element-by-id elem))
@@ -29,15 +29,18 @@
 
 ;; Оптимизированная функция настройки текстового контекста
 (define (setup-text-context! context)
-  ;; Группируем все настройки текста в одном месте
+  ;; Минимальные настройки для лучшей производительности
   (set-fill-color! context "#ffffff")
-  (set-border-color! context "black")
-  (set-font! context "bold 45px PTSans")
-  (set-text-align! context "left")
-  (set-shadow-blur! context 2)
-  (set-shadow-color! context "rgba(0,0,0,0.3)")
-  (set-shadow-offset-x! context 5)
-  (set-shadow-offset-y! context 5))
+  ;; Убираем потенциально медленные настройки:
+  ;; (set-border-color! context "black")     ; ← может вызывать strokeText
+  (set-font! context "45px PTSans")           ; ← убрали bold
+  ;; (set-text-align! context "left")        ; ← left по умолчанию
+  ;; Shadow отключён для производительности:
+  ;; (set-shadow-blur! context 2)
+  ;; (set-shadow-color! context "rgba(0,0,0,0.3)")
+  ;; (set-shadow-offset-x! context 5)
+  ;; (set-shadow-offset-y! context 5)
+  )
 
 (define (init-draw state-box)
   (let ((bg-context (make-2d-context "all-canvas"))
@@ -59,16 +62,34 @@
     (define *last-time* (make-parameter 0))
     ;; Оптимизация: создаём объект каретки один раз
     (define *carret-obj* (make-carret ""))
+    ;; Кэширование scene вычислений
+    (define *cached-scene* (make-parameter #f))
+    (define *cached-text* (make-parameter ""))
+    (define *cached-old-text* (make-parameter '()))
+    (define *cached-bg* (make-parameter #f))
+    (define *cached-sprites* (make-parameter '()))
+    (define *cached-reversed-old-text* (make-parameter '()))
     (define (draw prev-time)
       (let* ((state (atomic-box-ref state-box))
              (scene (assoc-ref state 'current-scene))
 	     (next  (assoc-ref state 'current-story-scene)))
         ;; (pk state)
 	(define completed? (equal? scene next))
-	(define text (scene-text scene))
-	(define old-text (scene-old-text scene))
-	(define bg (scene-bg scene))
-	(define sprites (scene-sprites scene))
+	
+	;; Кэширование: вычисляем scene данные только при изменении сцены
+	(unless (equal? scene (*cached-scene*))
+	  (*cached-scene* scene)
+	  (*cached-text* (scene-text scene))
+	  (*cached-old-text* (scene-old-text scene))
+	  (*cached-bg* (scene-bg scene))
+	  (*cached-sprites* (scene-sprites scene))
+	  (*cached-reversed-old-text* (reverse (*cached-old-text*))))
+	
+	;; Используем кэшированные значения
+	(define text (*cached-text*))
+	(define old-text (*cached-old-text*))
+	(define bg (*cached-bg*))
+	(define sprites (*cached-sprites*))
 	(*fps-counter* (+ (*fps-counter*) 1))
 	(let ((curr-second (current-second))
 	      (last-time (*last-time*)))
@@ -82,7 +103,7 @@
 	(draw-sprites sprites bg-context)
 	(clear-rect text-context 0.0 0.0 GW GH)
 	(define p1
-	  (draw-old-text (reverse old-text) text-context 50.0))
+	  (draw-old-text (*cached-reversed-old-text*) text-context 50.0))
 	(*last-pos* p1)
                                         ;)
 
@@ -98,3 +119,80 @@
 	1))
     (define draw-callback (procedure->external draw))
     draw-callback))
+
+(define (init-draw-function state-box)
+  (let ((bg-context (make-2d-context "all-canvas"))
+	(gray-context (make-2d-context "gray-canvas"))
+	(text-context (make-2d-context "text-canvas"))
+	(debug-context (make-2d-context "debug-canvas"))
+	(GW   1920.0)
+	(GH   1080.0))
+    ;; Настройка gray-context для полупрозрачного оверлея
+    (set-fill-color! gray-context "black")
+    (set-alpha! gray-context 0.3)
+    (fill-rect gray-context 0 0 GW GH)
+    
+    ;; Оптимизированная настройка текстовых контекстов
+    (setup-text-context! text-context)
+    (setup-text-context! debug-context)
+    (define *last-pos* (make-parameter 0))
+    (define *fps-counter* (make-parameter 0))
+    (define *last-time* (make-parameter 0))
+    ;; Оптимизация: создаём объект каретки один раз
+    (define *carret-obj* (make-carret ""))
+    ;; Кэширование scene вычислений
+    (define *cached-scene* (make-parameter #f))
+    (define *cached-text* (make-parameter ""))
+    (define *cached-old-text* (make-parameter '()))
+    (define *cached-bg* (make-parameter #f))
+    (define *cached-sprites* (make-parameter '()))
+    (define *cached-reversed-old-text* (make-parameter '()))
+    (define (draw prev-time)
+      (let* ((state (atomic-box-ref state-box))
+             (scene (assoc-ref state 'current-scene))
+	     (next  (assoc-ref state 'current-story-scene)))
+        ;; (pk state)
+	(define completed? (equal? scene next))
+	
+	;; Кэширование: вычисляем scene данные только при изменении сцены
+	(unless (equal? scene (*cached-scene*))
+	  (*cached-scene* scene)
+	  (*cached-text* (scene-text scene))
+	  (*cached-old-text* (scene-old-text scene))
+	  (*cached-bg* (scene-bg scene))
+	  (*cached-sprites* (scene-sprites scene))
+	  (*cached-reversed-old-text* (reverse (*cached-old-text*))))
+	
+	;; Используем кэшированные значения
+	(define text (*cached-text*))
+	(define old-text (*cached-old-text*))
+	(define bg (*cached-bg*))
+	(define sprites (*cached-sprites*))
+	(*fps-counter* (+ (*fps-counter*) 1))
+	(let ((curr-second (current-second))
+	      (last-time (*last-time*)))
+	  (when (>= (- curr-second last-time) 1)
+	    (*last-time* curr-second)
+	    (draw-fps (*fps-counter*) debug-context GW GH)
+	    (*fps-counter* 0)))
+
+	;; (unless completed?
+	(draw-bg bg bg-context GW GH)
+	(draw-sprites sprites bg-context)
+	(clear-rect text-context 0.0 0.0 GW GH)
+	(define p1
+	  (draw-old-text (*cached-reversed-old-text*) text-context 50.0))
+	(*last-pos* p1)
+                                        ;)
+
+	(let* ((p2&w2 (draw-text text text-context (*last-pos*)))
+	       (p2 (car p2&w2))
+	       (w2 (cdr p2&w2)))
+
+	  (unless (equal? text "")
+	    (draw-carret *carret-obj*
+			 text-context p2 w2 completed?))
+	  1
+	  )
+	1))
+    draw))
