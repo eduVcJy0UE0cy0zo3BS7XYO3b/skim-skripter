@@ -10,6 +10,7 @@ modules = \
   modules/dom/document.scm \
   modules/dom/element.scm \
   modules/dom/event.scm \
+  modules/dom/fullscreen.scm \
   modules/dom/image.scm \
   modules/dom/media.scm \
   modules/dom/window.scm \

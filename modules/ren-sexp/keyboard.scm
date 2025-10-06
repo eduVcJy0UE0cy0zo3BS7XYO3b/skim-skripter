@@ -10,6 +10,7 @@
   #:use-module (ren-sexp music)
   #:use-module (ren-sexp utils)
   #:use-module (ren-sexp settings)
+  #:use-module (dom fullscreen)
   #:export (add-key-up-listener!))
 
 (define (complete-or-begin-new-scene! state-box)
@@ -46,4 +47,6 @@
 	('Digit2	(set-text-speed! 1.0))  ; 2 - нормально
 	('Digit3	(set-text-speed! 1.5))  ; 3 - быстро
 	('Digit4	(set-text-speed! 2.0))  ; 4 - очень быстро
+	('KeyF	(pk "F key pressed, calling toggle-fullscreen-stage") (toggle-fullscreen-stage)) ; F - переключить полноэкранный режим
+	('F11	(pk "F11 key pressed, calling toggle-fullscreen-stage") (toggle-fullscreen-stage)) ; F11 - переключить полноэкранный режим
 	(_ #t)))))

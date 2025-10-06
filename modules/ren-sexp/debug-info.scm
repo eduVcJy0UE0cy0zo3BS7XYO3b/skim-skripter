@@ -2,6 +2,7 @@
   #:use-module (dom canvas)
   #:use-module (hoot numbers)
   #:use-module (ren-sexp settings)
+  #:use-module (dom fullscreen)
   #:export (draw-fps draw-performance-info draw-text-speed))
 
 (define (draw-fps number context W H)
@@ -30,9 +31,15 @@
                50.0
                50.0)
     (fill-text context
-               "Controls: 1-4 presets, +/- adjust"
+               "Controls: 1-4 presets, +/- adjust, F fullscreen"
                50.0
-               100.0))
+               100.0)
+    
+    ;; Статус полноэкранного режима
+    (fill-text context
+               (string-append "Fullscreen: " (if (is-fullscreen?) "ON" "OFF"))
+               50.0
+               150.0))
   
   ;; Performance info (справа вверху)
   (fill-text context

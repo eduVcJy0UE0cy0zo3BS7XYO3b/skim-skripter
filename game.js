@@ -96,7 +96,27 @@ window.addEventListener("load", async () => {
 		    createTextNode: (text) => document.createTextNode(text),
 		    createElement: (tag) => document.createElement(tag),
 		    addFont: (font) => document.fonts.add(font),
-		    createTreeWalker: Document.prototype.createTreeWalker.bind(document)
+		    createTreeWalker: Document.prototype.createTreeWalker.bind(document),
+		    // Fullscreen API
+		    requestFullscreen: (element) => {
+			try {
+			    console.log('Requesting fullscreen for element:', element);
+			    return element.requestFullscreen();
+			} catch (e) {
+			    console.warn('Failed to request fullscreen:', e);
+			}
+		    },
+		    exitFullscreen: () => {
+			try {
+			    if (document.fullscreenElement) {
+				return document.exitFullscreen();
+			    }
+			} catch (e) {
+			    console.warn('Failed to exit fullscreen:', e);
+			}
+		    },
+		    fullscreenElement: () => document.fullscreenElement,
+	    isFullscreen: () => document.fullscreenElement !== null ? 1 : 0
 		},
 		element: {
 		    value: (elem) => elem.value,
