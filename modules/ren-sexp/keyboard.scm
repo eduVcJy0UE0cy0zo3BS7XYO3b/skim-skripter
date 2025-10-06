@@ -10,6 +10,8 @@
   #:use-module (ren-sexp music)
   #:use-module (ren-sexp utils)
   #:use-module (ren-sexp settings)
+  #:use-module (ren-sexp menu)
+  #:use-module (ren-sexp game-state)
   #:use-module (dom fullscreen)
   #:export (add-key-up-listener!
             add-click-listener!
@@ -41,31 +43,58 @@
    (procedure->external
     (init-keyboard state-box))))
 
+;; Обработка клавиш в меню
+(define (handle-menu-keys key)
+  (match key
+    ('ArrowUp (navigate-menu 'up))
+    ('ArrowDown (navigate-menu 'down))
+    ('Enter (handle-menu-selection))
+    ('Escape (set-game-mode! 'game)) ; Выйти из меню
+    ('KeyF (toggle-fullscreen-stage))
+    ('F11 (toggle-fullscreen-stage))
+    (_ #t)))
+
+;; Обработка выбора в меню
+(define (handle-menu-selection)
+  (let ((action (select-menu-item)))
+    (match action
+      ('continue-game (set-game-mode! 'game))
+      ('exit-game (pk "Game exit requested"))
+      ('adjust-text-speed #t) ; Будет обрабатываться отдельно
+      ('adjust-volume #t)     ; Будет обрабатываться отдельно
+      ('toggle-fullscreen (toggle-fullscreen-stage))
+      (_ #t))))
+
+;; Обработка клавиш в игре
+(define (handle-game-keys key state-box)
+  (match key
+    ('Space	(complete-or-begin-new-scene! state-box))
+    ('Escape (set-game-mode! 'menu)) ; Открыть меню
+    ('Equal	(set-text-speed! (+ (get-text-speed) 0.1))) ; + увеличить скорость
+    ('Minus	(set-text-speed! (- (get-text-speed) 0.1))) ; - уменьшить скорость
+    ('BracketRight (set-volume! (+ (get-volume) 0.1))) ; ] увеличить громкость
+    ('BracketLeft  (set-volume! (- (get-volume) 0.1))) ; [ уменьшить громкость
+    ('KeyM	(toggle-mute!)) ; M - переключить звук
+    ('Digit1	(set-text-speed! 0.5))  ; 1 - очень медленно
+    ('Digit2	(set-text-speed! 1.0))  ; 2 - нормально
+    ('Digit3	(set-text-speed! 1.5))  ; 3 - быстро
+    ('Digit4	(set-text-speed! 2.0))  ; 4 - очень быстро
+    ('KeyF	(pk "F key pressed, calling toggle-fullscreen-stage") (toggle-fullscreen-stage)) ; F - переключить полноэкранный режим
+    ('F11	(pk "F11 key pressed, calling toggle-fullscreen-stage") (toggle-fullscreen-stage)) ; F11 - переключить полноэкранный режим
+    ('ShiftF11 (begin ; Shift+F11 - переключить автоматический полноэкранный режим
+                 (set-fullscreen-preference! (not (get-fullscreen-preference)))
+                 (pk "Fullscreen preference toggled to:" (get-fullscreen-preference))))
+    (_ #t)))
+
 (define (init-keyboard state-box)
   (lambda (event)
-    (let* ((key (string->symbol (keyboard-event-code event)))
-	   ;; (_ (put-message in #f))
-	   ;; (scene (get-message out))
-	   )
-      ;; (match (scene-state scene)
-      ;; 	('play
-      (match key
-	('Space	(complete-or-begin-new-scene! state-box))
-	('Equal	(set-text-speed! (+ (get-text-speed) 0.1))) ; + увеличить скорость
-	('Minus	(set-text-speed! (- (get-text-speed) 0.1))) ; - уменьшить скорость
-	('BracketRight (set-volume! (+ (get-volume) 0.1))) ; ] увеличить громкость
-	('BracketLeft  (set-volume! (- (get-volume) 0.1))) ; [ уменьшить громкость
-	('KeyM	(toggle-mute!)) ; M - переключить звук
-	('Digit1	(set-text-speed! 0.5))  ; 1 - очень медленно
-	('Digit2	(set-text-speed! 1.0))  ; 2 - нормально
-	('Digit3	(set-text-speed! 1.5))  ; 3 - быстро
-	('Digit4	(set-text-speed! 2.0))  ; 4 - очень быстро
-	('KeyF	(pk "F key pressed, calling toggle-fullscreen-stage") (toggle-fullscreen-stage)) ; F - переключить полноэкранный режим
-	('F11	(pk "F11 key pressed, calling toggle-fullscreen-stage") (toggle-fullscreen-stage)) ; F11 - переключить полноэкранный режим
-	('ShiftF11 (begin ; Shift+F11 - переключить автоматический полноэкранный режим
-		     (set-fullscreen-preference! (not (get-fullscreen-preference)))
-		     (pk "Fullscreen preference toggled to:" (get-fullscreen-preference))))
-	(_ #t)))))
+    (let* ((key (string->symbol (keyboard-event-code event))))
+      
+      (if (is-in-menu?)
+          ;; Обработка клавиш в меню
+          (handle-menu-keys key)
+          ;; Обработка клавиш в игре
+          (handle-game-keys key state-box)))))
 
 ;; Добавить обработчик кликов на stage
 (define (add-click-listener! state-box)

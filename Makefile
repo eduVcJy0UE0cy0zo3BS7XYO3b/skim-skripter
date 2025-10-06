@@ -28,6 +28,9 @@ modules = \
   modules/ren-sexp/scene-utils.scm \
   modules/ren-sexp/debug-info.scm \
   modules/ren-sexp/settings.scm \
+  modules/ren-sexp/game-state.scm \
+  modules/ren-sexp/menu.scm \
+  modules/ren-sexp/menu-draw.scm \
   modules/repl-environment.scm \
   modules/repl.scm \
   demo/assets.scm \
