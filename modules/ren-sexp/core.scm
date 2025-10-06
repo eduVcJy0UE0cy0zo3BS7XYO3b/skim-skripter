@@ -21,7 +21,7 @@
   #:export (black-screen init init-main-menu))
 
 (define (black-screen)
-  (%make-bg (make-image "resources/bg/black.png") 1000))
+  (%make-bg (make-image "resources/bg/black.png") 1000 "resources/bg/black.png"))
 
 (define (prime-font)
   (download-font!

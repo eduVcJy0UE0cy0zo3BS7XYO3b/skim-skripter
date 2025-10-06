@@ -9,8 +9,10 @@
   #:export (<bg>
 	    %make-bg
 	    make-bg
+	    make-bg-with-path
 	    bg-img
 	    bg-alpha
+	    bg-path
 	    same-bg?
 	    draw-bg
 	    next-bg
@@ -21,13 +23,17 @@
   (equal? bg1 bg2))
 
 (define-record-type <bg>
-  (%make-bg img alpha)
+  (%make-bg img alpha path)
   bg?
   (img bg-img)
-  (alpha bg-alpha))
+  (alpha bg-alpha)
+  (path bg-path))
 
 (define (make-bg img)
-  (%make-bg img 1000))
+  (%make-bg img 1000 #f))
+
+(define (make-bg-with-path img path)
+  (%make-bg img 1000 path))
 
 (define (draw-bg bg context game-width game-height)
   (match bg
@@ -56,12 +62,13 @@
 	       (next-alpha (+ alpha delta))
 	       (bg* (bg-update-alpha src-bg next-alpha)))
 	  (scene-update-bg dst bg*))
-        (scene-update-bg dst (bg-update-alpha src-bg 0)))))
+        (let ((bg* (bg-update-alpha src-bg 0)))
+	  (scene-update-bg dst bg*)))))
 
 (define (bg-update-alpha bg alpha*)
   (match bg
-    (($ <bg> img alpha)
-     (%make-bg img alpha*))
+    (($ <bg> img alpha path)
+     (%make-bg img alpha* path))
     (_ #f)))
 
 (define (include-bg scene curr next)

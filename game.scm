@@ -47,30 +47,35 @@
    #:text "Hello and Welcome to this new super visual novel engine!  Press <SPACE> to launch the game."))
 
 (define music:curious_critters
-  (make-music (audio:curious_critters) 100))
+  (let ((music (make-music (audio:curious_critters) 100 "resources/bgm/curious_critters_extended.mp3")))
+    (pk "CREATED MUSIC:CURIOUS_CRITTERS with path:" (music-path music))
+    music))
 
 (define nastya:tired
-  (make-sprite (image:nastya-tired) 1000 'left 'nastya 'tired 'casual))
+  (make-sprite (image:nastya-tired) 1000 'left 'nastya 'tired 'casual "resources/sprites/nastya_tired_1600.webp"))
 
 (define nastya:normal
-  (make-sprite (image:nastya-normal) 1000 'left 'nastya 'normal 'casual))
+  (make-sprite (image:nastya-normal) 1000 'left 'nastya 'normal 'casual "resources/sprites/nastya_normal_1600.png"))
 
 (define nastya:normal-ice
-  (make-sprite (image:nastya-normal-ice) 1000 'left 'nastya 'normal-ice 'casual))
+  (make-sprite (image:nastya-normal-ice) 1000 'left 'nastya 'normal-ice 'casual "resources/sprites/nastya_normal_1600_ice.png"))
 
 (define masha:happy
-  (make-sprite (image:masha-happy) 1000 'right 'masha 'happy 'casual))
+  (make-sprite (image:masha-happy) 1000 'right 'masha 'happy 'casual "resources/sprites/masha_happy_1600.webp"))
 
 (define masha:troubled
-  (make-sprite (image:masha-troubled) 1000 'right 'masha 'troubled 'casual))
+  (make-sprite (image:masha-troubled) 1000 'right 'masha 'troubled 'casual "resources/sprites/masha_troubled_1600.png"))
 
 (define masha:normal
-  (make-sprite (image:masha-normal) 1000 'right 'masha 'normal 'casual))
+  (make-sprite (image:masha-normal) 1000 'right 'masha 'normal 'casual "resources/sprites/masha_normal_1600.png"))
 
-(define bg:kitchen (%make-bg (image:kitchen) 1000))
+(define bg:kitchen
+  (let ((bg (%make-bg (image:kitchen) 1000 "resources/bg/bg_kitchen.jpeg")))
+    (pk "CREATED BG:KITCHEN with path:" (bg-path bg))
+    bg))
 
 (define END
-  (make-scene #:bg (make-bg (image:end))))
+  (make-scene #:bg (make-bg-with-path (image:end) "resources/bg/end.png")))
 (define script
   (->> (list WELCOME)
        (CLEAN)
@@ -80,7 +85,7 @@
        (JOIN	(list masha:normal nastya:tired))
        (UPDATE	masha:normal masha:happy)
        (TXT	"And here the water is ready.")
-       (CLEAN)
+
        (UPDATE	nastya:tired nastya:normal)
        (+TXT	"My patience has ended!")
 

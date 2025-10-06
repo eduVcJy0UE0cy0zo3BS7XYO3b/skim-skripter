@@ -30,7 +30,6 @@
 ;; Проверить, находимся ли в полноэкранном режиме
 (define (is-fullscreen?)
   (let ((result (%is-fullscreen-js)))
-    (pk "is-fullscreen JS result:" result)
     (= result 1)))
 
 ;; Безопасный выход из полноэкранного режима

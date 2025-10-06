@@ -60,7 +60,10 @@
      scenes)))
 
 (define (CLEAN scenes)
-  (cons (make-scene #:ttl 2) scenes))
+  (let* ((current-scene (car scenes))
+         (old-text (scene-old-text current-scene)))
+    (cons (make-scene #:old-text old-text
+                      #:ttl 2) scenes)))
 
 (define (TXT text scenes)
   (cons

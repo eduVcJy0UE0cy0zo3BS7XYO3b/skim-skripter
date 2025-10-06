@@ -13,21 +13,23 @@
 	    music?
 	    music-audio
 	    music-volume
+	    music-path
 	    mute-toggle
 	    change-volume
 	    set-current-volume
 	    include-music))
 
 (define-record-type <music>
-  (make-music audio volume)
+  (make-music audio volume path)
   music?
   (audio music-audio)
-  (volume music-volume))
+  (volume music-volume)
+  (path music-path))
 
 (define (same-audio? music1 music2)
-  (let ((audio1 (music-audio music1))
-        (audio2 (music-audio music2)))
-    (string=? audio1 audio2)))
+  (let ((path1 (music-path music1))
+        (path2 (music-path music2)))
+    (and path1 path2 (string=? path1 path2))))
 
 (define (same-volume? music1 music2)
   (let ((volume1 (music-volume music1))
@@ -36,12 +38,12 @@
 
 (define (update-music-volume music volume*)
   (match music
-    (($ <music> audio volume)
-     (make-music audio volume*))))
+    (($ <music> audio volume path)
+     (make-music audio volume* path))))
 
 (define (inc-volume src-music dst-music)
   (if (not (music? dst-music))
-      (make-music (music-audio src-music) 0)
+      (make-music (music-audio src-music) 0 (music-path src-music))
       (when (same-audio? src-music dst-music)
 	  (update-music-volume dst-music (+ 1 (music-volume dst-music))))))
 
@@ -95,7 +97,8 @@
 
    ((and (music? next-music)
 	 (music? curr-music)
-	 (equal? next-music curr-music))
+	 (same-audio? next-music curr-music)
+	 (same-volume? next-music curr-music))
     next-scene)
 
    ((and (music? next-music)
@@ -114,4 +117,5 @@
    ((and (music? next-music) (not curr-music))
     (media-play (set-current-volume (music-audio next-music)))
     (set-media-loop! (music-audio next-music) 1)
-    (scene-update-music next-scene next-music))))
+    (scene-update-music next-scene next-music))
+   ))

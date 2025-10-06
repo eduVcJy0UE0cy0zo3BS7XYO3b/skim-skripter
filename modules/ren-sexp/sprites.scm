@@ -14,6 +14,7 @@
 	    sprite-character
 	    sprite-mood
 	    sprite-wear
+	    sprite-path
 
 	    draw-sprites
 	    next-sprites
@@ -25,14 +26,15 @@
   (equal? sprite1 sprite2))
 
 (define-record-type <sprite>
-  (make-sprite img alpha pos character mood wear)
+  (make-sprite img alpha pos character mood wear path)
   sprite?
   (img sprite-img)
   (alpha sprite-alpha)
   (pos sprite-pos)
   (character sprite-character)
   (mood sprite-mood)
-  (wear sprite-wear))
+  (wear sprite-wear)
+  (path sprite-path))
 
 (define (characters-in-scene sprites)
   (map (lambda (sprite) (sprite-character sprite)) sprites))
@@ -46,8 +48,8 @@
 
 (define (update-sprite-alpha sprite alpha*)
   (match sprite
-    (($ <sprite> img alpha pos character mood wear)
-     (make-sprite img alpha* pos character mood wear))))
+    (($ <sprite> img alpha pos character mood wear path)
+     (make-sprite img alpha* pos character mood wear path))))
 
 (define (get-sprite-by-name name sprites)
   (define (%get-sprite-by-name sprites)

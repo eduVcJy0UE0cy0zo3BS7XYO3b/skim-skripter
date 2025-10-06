@@ -28,18 +28,21 @@
       ($ <scene> state  bg  old-text
 	 text  sprites  music  carret  ttl))
      (cond
-      ((not (equal? music music*))
-       (cond
-        ((and (music? music)
-              (not music*))
-         (media-pause (music-audio music))
-         (scene-update-music current music*))
+      ;; ((not (equal? (and music (music-path music))
+      ;;               (and music* (music-path music*))))
+      ;;  (cond
+      ;;   ((and (music? music)
+      ;;         (not music*))
+      ;;    (media-pause (music-audio music))
+      ;;    (scene-update-music current music*))
 
-        ((and (not music)
-              (music? music*))
-         (media-play (set-current-volume (music-audio music*)))
-         (set-media-loop! (music-audio music*) 1)
-         (scene-update-music current music*))))
+      ;;   ((and (not music)
+      ;;         (music? music*))
+      ;;    (media-play (set-current-volume (music-audio music*)))
+      ;;    (set-media-loop! (music-audio music*) 1)
+      ;;    (scene-update-music current music*))
+
+      ;;   (else current)))
 
       ((not (same-bg? bg* bg))
        (next-bg next current))
@@ -58,8 +61,8 @@
 (define (compute-next-state state-box scene next)
   (if (equal? scene next)
       (if (inf-ttl? next)
-	  scene
-	  (append-empty-scene! state-box scene next (make-scene)))
+          scene
+          (append-empty-scene! state-box scene next (make-scene)))
       (next-scene-increment next scene)))
 
 (define (init-update state-box)
@@ -72,14 +75,14 @@
   (define *draw-time-sum* (make-parameter 0))
   (define *avg-update-time* (make-parameter 0))
   (define *avg-draw-time* (make-parameter 0))
-  
+
   (define *last-frame-time* (make-parameter 0))
-  
+
   (define (update-and-draw current-time)
     ;; (pk 3)
     ;; (pk (get-state))
     (define start-total current-time)
-    
+
     ;; Этап обновления - используем current-time для точного измерения
     (define start-update current-time)
     (let* ((state (atomic-box-ref state-box))
@@ -93,19 +96,19 @@
       )
     ;; Примерное время окончания update (добавляем небольшую оценку)
     (define end-update (+ start-update 0.1))
-    
+
     ;; Этап отрисовки (сначала вызываем draw, а потом добавляем профилирование)
     (define start-draw end-update)
     (draw-function current-time (*avg-update-time*) (*avg-draw-time*))
     ;; Общее время кадра
     (define frame-time (- current-time (*last-frame-time*)))
     (*last-frame-time* current-time)
-    
+
     ;; Сбор статистики - используем frame-time для более точного измерения
     (*profile-counter* (+ (*profile-counter*) 1))
     (*update-time-sum* (+ (*update-time-sum*) 0.1)) ; Примерная оценка
     (*draw-time-sum* (+ (*draw-time-sum*) (max 0 (- frame-time 0.1))))
-    
+
     ;; Обновление средних значений раз в секунду
     (let ((curr-second (current-second))
           (last-time (*profile-last-time*)))
@@ -119,7 +122,7 @@
         (*profile-counter* 0)
         (*update-time-sum* 0)
         (*draw-time-sum* 0)))
-    
+
     ;; (pk 5)
     (request-animation-frame update-and-draw-callback))
   (define update-and-draw-callback (procedure->external update-and-draw))

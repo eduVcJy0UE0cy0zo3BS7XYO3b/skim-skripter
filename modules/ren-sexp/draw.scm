@@ -206,11 +206,12 @@
       ;; Кэширование: вычисляем scene данные только при изменении сцены
       (unless (equal? scene (*cached-scene*))
         (*cached-scene* scene)
-        (*cached-text* (scene-text scene))
-        (*cached-old-text* (scene-old-text scene))
-        (*cached-bg* (scene-bg scene))
-        (*cached-sprites* (scene-sprites scene))
-        (*cached-reversed-old-text* (reverse (*cached-old-text*))))
+        (when (scene? scene)
+          (*cached-text* (scene-text scene))
+          (*cached-old-text* (scene-old-text scene))
+          (*cached-bg* (scene-bg scene))
+          (*cached-sprites* (scene-sprites scene))
+          (*cached-reversed-old-text* (reverse (*cached-old-text*)))))
       
       ;; Используем кэшированные значения
       (define text (*cached-text*))

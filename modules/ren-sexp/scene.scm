@@ -5,6 +5,7 @@
 
   #:export (<scene>
 	    make-scene
+	    scene?
 	    scene-state
 	    scene-bg
 	    scene-old-text
@@ -23,6 +24,7 @@
 	    scene-add-music
 	    scene-update-carret
 	    scene-update-ttl
+	    make-scene-with-state
 
 	    next-ttl))
 
@@ -58,6 +60,10 @@
 	  (carret "")
 	  (ttl 'inf))
   (%make-scene state bg old-text text sprites music carret ttl))
+
+;; Создать сцену с заданным состоянием (для восстановления из сохранений)
+(define (make-scene-with-state bg music sprites old-text)
+  (%make-scene 'play bg old-text "" sprites music "" 'inf))
 
 (define (scene-update-carret scene carret*)
   (match scene
