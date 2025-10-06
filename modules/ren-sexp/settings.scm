@@ -1,9 +1,16 @@
 (define-module (ren-sexp settings)
   #:use-module (dom storage)
+  #:use-module (dom media)
   #:export (init-settings!
             get-text-speed
             set-text-speed!
             should-add-text-char?
+            get-volume
+            set-volume!
+            get-mute
+            set-mute!
+            toggle-mute!
+            set-current-audio!
             get-fullscreen-preference
             set-fullscreen-preference!
             get-auto-fullscreen-on-first-interaction
@@ -25,6 +32,9 @@
 
 ;; Глобальный флаг для автоматического полноэкранного режима
 (define *auto-fullscreen-on-first-interaction* #f)
+
+;; Глобальная переменная для текущего аудио
+(define *current-audio* #f)
 
 (define (get-text-speed)
   (let ((speed-str (get-item "text-speed")))
@@ -49,6 +59,46 @@
     (when should-add
       (set! *text-frame-counter* 0))  ; сбрасываем счетчик
     should-add))  ; возвращаем true, если нужно добавить символ
+
+;; Функции для работы с громкостью
+(define (get-volume)
+  (let ((volume-str (get-item "volume")))
+    (if volume-str
+        (string->number volume-str)
+        1.0)))
+
+(define (set-volume! volume)
+  (let ((clamped-volume (max 0.0 (min 1.0 volume))))
+    (set-item! "volume" (number->string clamped-volume))
+    ;; Обновить громкость активной музыки если не заглушено
+    (unless (get-mute)
+      (update-active-music-volume clamped-volume))))
+
+(define (get-mute)
+  (let ((mute-str (get-item "is-mute")))
+    (if mute-str
+        (string=? mute-str "#t")
+        #f)))
+
+(define (set-mute! muted)
+  (set-item! "is-mute" (if muted "#t" "#f")))
+
+(define (toggle-mute!)
+  (let ((new-mute-state (not (get-mute))))
+    (set-mute! new-mute-state)
+    ;; Обновить громкость активной музыки
+    (if new-mute-state
+        (update-active-music-volume 0.0)  ; заглушить
+        (update-active-music-volume (get-volume)))))
+
+;; Функции для работы с текущим аудио
+(define (set-current-audio! audio)
+  (set! *current-audio* audio))
+
+(define (update-active-music-volume volume)
+  (when *current-audio*
+    (pk "Updating volume to:" volume "for audio:" *current-audio*)
+    (set-media-volume! *current-audio* volume)))
 
 ;; Настройки предпочтения полноэкранного режима
 (define (get-fullscreen-preference)

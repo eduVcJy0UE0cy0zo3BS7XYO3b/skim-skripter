@@ -50,12 +50,12 @@
       ;; (match (scene-state scene)
       ;; 	('play
       (match key
-	;; ('Equal	(change-volume scene 0.05))
-	;; ('Minus	(change-volume scene -0.05))
-	;; ('KeyM	(mute-toggle scene))
 	('Space	(complete-or-begin-new-scene! state-box))
 	('Equal	(set-text-speed! (+ (get-text-speed) 0.1))) ; + увеличить скорость
 	('Minus	(set-text-speed! (- (get-text-speed) 0.1))) ; - уменьшить скорость
+	('BracketRight (set-volume! (+ (get-volume) 0.1))) ; ] увеличить громкость
+	('BracketLeft  (set-volume! (- (get-volume) 0.1))) ; [ уменьшить громкость
+	('KeyM	(toggle-mute!)) ; M - переключить звук
 	('Digit1	(set-text-speed! 0.5))  ; 1 - очень медленно
 	('Digit2	(set-text-speed! 1.0))  ; 2 - нормально
 	('Digit3	(set-text-speed! 1.5))  ; 3 - быстро

@@ -39,7 +39,20 @@
     (fill-text context
                (string-append "Fullscreen: " (if (is-fullscreen?) "ON" "OFF"))
                50.0
-               150.0))
+               150.0)
+    
+    ;; Информация о громкости
+    (let* ((volume (get-volume))
+           (rounded-volume (* (round (* volume 100)) 1))  ; округляем до процентов
+           (muted? (get-mute)))
+      (fill-text context
+                 (string-append "Volume: " (if muted? "MUTED" (string-append (number->string (inexact->exact rounded-volume)) "%")))
+                 50.0
+                 200.0)
+      (fill-text context
+                 "Controls: [/] volume, M mute"
+                 50.0
+                 250.0)))
   
   ;; Performance info (справа вверху)
   (fill-text context
@@ -79,4 +92,17 @@
     (fill-text context
                "Controls: 1-4 presets, +/- adjust"
                50.0
-               100.0)))
+               100.0)
+    
+    ;; Информация о громкости
+    (let* ((volume (get-volume))
+           (rounded-volume (* (round (* volume 100)) 1))  ; округляем до процентов
+           (muted? (get-mute)))
+      (fill-text context
+                 (string-append "Volume: " (if muted? "MUTED" (string-append (number->string (inexact->exact rounded-volume)) "%")))
+                 50.0
+                 150.0)
+      (fill-text context
+                 "Controls: [/] volume, M mute"
+                 50.0
+                 200.0))))

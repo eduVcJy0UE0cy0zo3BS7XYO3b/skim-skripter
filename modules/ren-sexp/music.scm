@@ -7,6 +7,7 @@
   #:use-module (hoot records)
   #:use-module (ren-sexp utils)
   #:use-module (ren-sexp scene)
+  #:use-module (ren-sexp settings)
   #:export (<music>
 	    make-music
 	    music?
@@ -14,6 +15,7 @@
 	    music-volume
 	    mute-toggle
 	    change-volume
+	    set-current-volume
 	    include-music))
 
 (define-record-type <music>
@@ -81,6 +83,8 @@
      (if is-mute
          0.0
 	 volume))
+    ;; Регистрируем аудио как текущее
+    (set-current-audio! audio)
     audio))
 
 (define (include-music next-scene curr-music next-music)

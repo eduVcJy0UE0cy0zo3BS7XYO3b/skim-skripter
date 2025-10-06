@@ -37,7 +37,7 @@
 
         ((and (not music)
               (music? music*))
-         (media-play (music-audio music*))
+         (media-play (set-current-volume (music-audio music*)))
          (set-media-loop! (music-audio music*) 1)
          (scene-update-music current music*))))
 
