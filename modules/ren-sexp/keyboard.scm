@@ -15,13 +15,20 @@
   #:use-module (ren-sexp save-system)
   #:use-module (ren-sexp save-menu)
   #:use-module (ren-sexp game-state)
+  #:use-module (ren-sexp draw)
   #:use-module (dom fullscreen)
   #:export (add-key-up-listener!
             add-click-listener!
             handle-interaction!
             start-game!
-            ))
+            return-to-main-menu!))
 
+
+;; Вернуться в главное меню (очистить игровые данные и остановить музыку)
+(define (return-to-main-menu!)
+  (stop-current-music!)     ; Остановить музыку
+  (clear-game-canvases!)    ; Очистить игровые канвасы
+  (set-game-mode! 'main-menu)) ; Переключиться в главное меню
 
 ;; Начать игру
 (define (start-game! state-box)
@@ -100,7 +107,7 @@
     ('Escape 
      (let ((came-from (menu-state-came-from (get-menu-state))))
        (if (eq? came-from 'main-menu)
-           (set-game-mode! 'main-menu)
+           (return-to-main-menu!)
            (set-game-mode! 'game)))) ; Вернуться туда, откуда пришли
     ('KeyF (toggle-fullscreen-stage))
     ('F11 (toggle-fullscreen-stage))
@@ -113,9 +120,9 @@
     ('ArrowDown (navigate-save-menu 'down))
     ('Enter (handle-save-menu-selection state-box))
     ('Escape (cond
-              ((is-in-load-menu?) (set-game-mode! 'main-menu))
+              ((is-in-load-menu?) (return-to-main-menu!))
               ((is-in-save-menu?) (set-game-mode! 'menu))
-              (else (set-game-mode! 'main-menu)))) ; Вернуться назад
+              (else (return-to-main-menu!)))) ; Вернуться назад
     ('KeyF (toggle-fullscreen-stage))
     ('F11 (toggle-fullscreen-stage))
     (_ #t)))
@@ -129,8 +136,8 @@
        (begin
          (init-save-menu 'save)
          (set-game-mode! 'save-menu))) ; Переход в меню сохранения
-      ('exit-game (set-game-mode! 'main-menu)) ; Вернуться в главное меню
-      ('back-to-main-menu (set-game-mode! 'main-menu)) ; Вернуться в главное меню
+      ('exit-game (return-to-main-menu!)) ; Вернуться в главное меню
+      ('back-to-main-menu (return-to-main-menu!)) ; Вернуться в главное меню
       ('adjust-text-speed #t) ; Будет обрабатываться отдельно
       ('adjust-volume #t)     ; Будет обрабатываться отдельно
       ('toggle-fullscreen (toggle-fullscreen-stage))
@@ -142,9 +149,9 @@
   (let ((selection (select-save-menu-item)))
     (if (eq? selection 'back)
         (cond
-          ((is-in-load-menu?) (set-game-mode! 'main-menu))
+          ((is-in-load-menu?) (return-to-main-menu!))
           ((is-in-save-menu?) (set-game-mode! 'menu))
-          (else (set-game-mode! 'main-menu)))
+          (else (return-to-main-menu!)))
         (let ((action-type (car selection))
               (slot-number (cadr selection))
               (exists (caddr selection))

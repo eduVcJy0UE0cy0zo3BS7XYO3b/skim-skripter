@@ -19,7 +19,7 @@
   #:use-module (ren-sexp settings)
   #:use-module (ren-sexp game-state)
   #:use-module (ren-sexp menu-draw)
-  #:export (init-draw init-draw-function))
+  #:export (init-draw init-draw-function clear-game-canvases!))
 
 (define (make-2d-context elem)
   (let* ((canvas (get-element-by-id elem))
@@ -293,3 +293,15 @@
            (draw-game-interface completed? scene next)))))
     
     draw))
+
+;; Функция для очистки игровых канвасов при переходе в главное меню
+(define (clear-game-canvases!)
+  (let ((bg-context (make-2d-context "all-canvas"))
+        (text-context (make-2d-context "text-canvas"))
+        (debug-context (make-2d-context "debug-canvas"))
+        (GW 1920.0)
+        (GH 1080.0))
+    ;; Очищаем все игровые канвасы
+    (clear-rect bg-context 0.0 0.0 GW GH)
+    (clear-rect text-context 0.0 0.0 GW GH)
+    (clear-rect debug-context 0.0 0.0 GW GH)))

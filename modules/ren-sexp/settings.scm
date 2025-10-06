@@ -17,7 +17,9 @@
             set-auto-fullscreen-on-first-interaction!
             get-debug-info
             set-debug-info!
-            toggle-debug-info!))
+            toggle-debug-info!
+            stop-current-music!
+            get-current-audio))
 
 (define (init-settings!)
   (let ((volume (get-item "volume"))
@@ -133,3 +135,13 @@
 
 (define (toggle-debug-info!)
   (set-debug-info! (not (get-debug-info))))
+
+;; Получить текущее аудио
+(define (get-current-audio)
+  *current-audio*)
+
+;; Остановить текущую музыку
+(define (stop-current-music!)
+  (when *current-audio*
+    (media-pause *current-audio*)
+    (set! *current-audio* #f)))
