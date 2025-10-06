@@ -9,6 +9,7 @@
   #:use-module (ren-sexp scene)
   #:use-module (ren-sexp music)
   #:use-module (ren-sexp utils)
+  #:use-module (ren-sexp settings)
   #:export (add-key-up-listener!))
 
 (define (complete-or-begin-new-scene! state-box)
@@ -39,4 +40,10 @@
 	;; ('Minus	(change-volume scene -0.05))
 	;; ('KeyM	(mute-toggle scene))
 	('Space	(complete-or-begin-new-scene! state-box))
+	('Equal	(set-text-speed! (+ (get-text-speed) 0.1))) ; + увеличить скорость
+	('Minus	(set-text-speed! (- (get-text-speed) 0.1))) ; - уменьшить скорость
+	('Digit1	(set-text-speed! 0.5))  ; 1 - очень медленно
+	('Digit2	(set-text-speed! 1.0))  ; 2 - нормально
+	('Digit3	(set-text-speed! 1.5))  ; 3 - быстро
+	('Digit4	(set-text-speed! 2.0))  ; 4 - очень быстро
 	(_ #t)))))

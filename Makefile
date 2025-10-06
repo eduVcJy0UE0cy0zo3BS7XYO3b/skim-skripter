@@ -26,13 +26,11 @@ modules = \
   modules/ren-sexp/update.scm \
   modules/ren-sexp/scene-utils.scm \
   modules/ren-sexp/debug-info.scm \
+  modules/ren-sexp/settings.scm \
   modules/repl-environment.scm \
   modules/repl.scm \
   demo/assets.scm \
   modules/ren-sexp/utils.scm
-
-test.wasm: test.scm $(modules)
-	HOOT_LOAD_PATH=$(HOOT_LP) $(GUILD) compile-wasm --run -L $(GOBLINS_PATH)  -L modules -L . -o $@ $<
 
 game.wasm: game.scm $(modules)
 	HOOT_LOAD_PATH=$(HOOT_LP) guix shell guile-next guile-hoot -- $(GUILD) compile-wasm --async -L $(GOBLINS_PATH)  -L modules -L . -o $@ $<

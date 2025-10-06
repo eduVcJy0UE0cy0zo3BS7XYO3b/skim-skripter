@@ -6,6 +6,7 @@
   #:use-module (ice-9 match)
   #:use-module (ren-sexp utils)
   #:use-module (ren-sexp scene)
+  #:use-module (ren-sexp settings)
   #:export (next-string
 	    draw-text
 	    same-text?
@@ -42,9 +43,17 @@
   (define current-text (scene-text current))
   (define next-text (scene-text next))
   (define pos (string-length current-text))
-  (define next-pos (+ 1 pos))
-  (define text* (substring next-text 0 next-pos))
-  (scene-update-text current text*))
+  (define target-length (string-length next-text))
+  
+  ;; Если текст уже полностью напечатан, не увеличиваем дальше
+  (if (>= pos target-length)
+      current  ; Возвращаем текущую сцену без изменений
+      ;; Проверяем, нужно ли добавить символ в этом кадре
+      (if (should-add-text-char?)
+          (let* ((next-pos (min target-length (+ pos 1)))
+                 (text* (substring next-text 0 next-pos)))
+            (scene-update-text current text*))
+          current)))  ; Возвращаем текущую сцену без изменений
 
 (define (next-old-text next current)
   (define current-text (scene-old-text current))

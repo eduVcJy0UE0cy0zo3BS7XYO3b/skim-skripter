@@ -16,6 +16,7 @@
   #:use-module (fibers channels)
   #:use-module (hoot ffi)
   #:use-module (ren-sexp utils)
+  #:use-module (ren-sexp settings)
   #:export (init-draw init-draw-function))
 
 (define (make-2d-context elem)
