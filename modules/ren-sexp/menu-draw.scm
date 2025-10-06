@@ -47,6 +47,7 @@
                   ('settings '(("Text Speed" . text-speed)
                                ("Volume" . volume)
                                ("Fullscreen" . fullscreen)
+                               ("Debug Info" . debug-info)
                                ("Back" . back)))
                   ('credits '(("Game Engine: Skim Skripter" . info)
                               ("Built with Guile Hoot" . info)
@@ -80,6 +81,8 @@
                                                       (string-append (number->string (inexact->exact (* vol 100))) "%")))))
                                 ('fullscreen
                                  (string-append text ": " (if (get-fullscreen-preference) "ON" "OFF")))
+                                ('debug-info
+                                 (string-append text ": " (if (get-debug-info) "ON" "OFF")))
                                 (_ text))))
             
             ;; Отрисовка текста

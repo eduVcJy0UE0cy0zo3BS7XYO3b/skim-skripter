@@ -3,7 +3,7 @@
   #:use-module (hoot numbers)
   #:use-module (ren-sexp settings)
   #:use-module (dom fullscreen)
-  #:export (draw-fps draw-performance-info draw-text-speed))
+  #:export (draw-fps draw-performance-info draw-text-speed draw-debug-info))
 
 (define (draw-fps number context W H)
   (clear-rect context 1650.0 0.0 270.0 100.0)  ; очищаем только область FPS
@@ -106,3 +106,49 @@
                  "Controls: [/] volume, M mute"
                  50.0
                  200.0))))
+
+(define (draw-debug-info fps-counter context W H)
+  ;; Очищаем область для дебаг информации
+  (clear-rect context 0.0 0.0 W H)
+  ;; Устанавливаем стили для debug текста
+  (set-fill-color! context "#00ff00")  ; зелёный цвет для хорошей видимости
+  (set-font! context "bold 20px PTSans")
+  
+  ;; Скорость текста
+  (let* ((speed (get-text-speed))
+         (rounded-speed (/ (round (* speed 10)) 10))  ; округляем до 1 знака после запятой
+         (speed-str (number->string rounded-speed))
+         (frames-per-char (/ 1.0 speed)))
+    (fill-text context
+               (string-append "Text Speed: " speed-str "x (" (number->string (inexact->exact (round frames-per-char))) " frames/char)")
+               50.0
+               50.0)
+    (fill-text context
+               "Controls: 1-4 presets, +/- adjust, F fullscreen"
+               50.0
+               100.0)
+    
+    ;; Статус полноэкранного режима
+    (fill-text context
+               (string-append "Fullscreen: " (if (is-fullscreen?) "ON" "OFF"))
+               50.0
+               150.0)
+    
+    ;; Информация о громкости
+    (let* ((volume (get-volume))
+           (rounded-volume (* (round (* volume 100)) 1))  ; округляем до процентов
+           (muted? (get-mute)))
+      (fill-text context
+                 (string-append "Volume: " (if muted? "MUTED" (string-append (number->string (inexact->exact rounded-volume)) "%")))
+                 50.0
+                 200.0)
+      (fill-text context
+                 "Controls: [/] volume, M mute, ` debug"
+                 50.0
+                 250.0))
+    
+    ;; FPS (справа вверху)  
+    (fill-text context
+               (string-append "FPS: " (number->string fps-counter))
+               1700.0
+               50.0)))

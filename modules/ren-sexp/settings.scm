@@ -14,7 +14,10 @@
             get-fullscreen-preference
             set-fullscreen-preference!
             get-auto-fullscreen-on-first-interaction
-            set-auto-fullscreen-on-first-interaction!))
+            set-auto-fullscreen-on-first-interaction!
+            get-debug-info
+            set-debug-info!
+            toggle-debug-info!))
 
 (define (init-settings!)
   (let ((volume (get-item "volume"))
@@ -68,11 +71,13 @@
         1.0)))
 
 (define (set-volume! volume)
-  (let ((clamped-volume (max 0.0 (min 1.0 volume))))
-    (set-item! "volume" (number->string clamped-volume))
+  (let* ((clamped-volume (max 0.0 (min 1.0 volume)))
+         ;; Округляем до 2 знаков после запятой чтобы избежать проблем с точностью
+         (rounded-volume (/ (round (* clamped-volume 100)) 100)))
+    (set-item! "volume" (number->string rounded-volume))
     ;; Обновить громкость активной музыки если не заглушено
     (unless (get-mute)
-      (update-active-music-volume clamped-volume))))
+      (update-active-music-volume rounded-volume))))
 
 (define (get-mute)
   (let ((mute-str (get-item "is-mute")))
@@ -97,7 +102,6 @@
 
 (define (update-active-music-volume volume)
   (when *current-audio*
-    (pk "Updating volume to:" volume "for audio:" *current-audio*)
     (set-media-volume! *current-audio* volume)))
 
 ;; Настройки предпочтения полноэкранного режима
@@ -116,3 +120,16 @@
 
 (define (set-auto-fullscreen-on-first-interaction! enabled)
   (set! *auto-fullscreen-on-first-interaction* enabled))
+
+;; Настройки отображения дебаг информации
+(define (get-debug-info)
+  (let ((debug-str (get-item "debug-info")))
+    (if debug-str
+        (string=? debug-str "#t")
+        #f)))  ; По умолчанию выключено
+
+(define (set-debug-info! enabled)
+  (set-item! "debug-info" (if enabled "#t" "#f")))
+
+(define (toggle-debug-info!)
+  (set-debug-info! (not (get-debug-info))))

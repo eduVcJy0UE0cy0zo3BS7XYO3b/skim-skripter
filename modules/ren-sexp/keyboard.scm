@@ -63,6 +63,7 @@
       ('adjust-text-speed #t) ; Будет обрабатываться отдельно
       ('adjust-volume #t)     ; Будет обрабатываться отдельно
       ('toggle-fullscreen (toggle-fullscreen-stage))
+      ('toggle-debug-info (toggle-debug-info!))
       (_ #t))))
 
 ;; Обработка клавиш в игре
@@ -84,6 +85,7 @@
     ('ShiftF11 (begin ; Shift+F11 - переключить автоматический полноэкранный режим
                  (set-fullscreen-preference! (not (get-fullscreen-preference)))
                  (pk "Fullscreen preference toggled to:" (get-fullscreen-preference))))
+    ('Backquote (toggle-debug-info!)) ; ` (тильда) - переключить дебаг информацию
     (_ #t)))
 
 (define (init-keyboard state-box)

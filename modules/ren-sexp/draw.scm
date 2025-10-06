@@ -61,6 +61,7 @@
     (setup-text-context! debug-context)
     (define *last-pos* (make-parameter 0))
     (define *fps-counter* (make-parameter 0))
+    (define *last-fps* (make-parameter 0))
     (define *last-time* (make-parameter 0))
     ;; Оптимизация: создаём объект каретки один раз
     (define *carret-obj* (make-carret ""))
@@ -100,8 +101,13 @@
 	      (last-time (*last-time*)))
 	  (when (>= (- curr-second last-time) 1)
 	    (*last-time* curr-second)
-	    (draw-fps (*fps-counter*) debug-context GW GH)
+	    (*last-fps* (*fps-counter*))
 	    (*fps-counter* 0)))
+	
+	;; Отображение дебаг информации (независимо от FPS)
+	(if (get-debug-info)
+	    (draw-debug-info (*last-fps*) debug-context GW GH)
+	    (clear-rect debug-context 0.0 0.0 GW GH))
 
 	;; (unless completed?
 	(draw-bg bg bg-context GW GH)
@@ -162,6 +168,7 @@
     (setup-text-context! debug-context)
     (define *last-pos* (make-parameter 0))
     (define *fps-counter* (make-parameter 0))
+    (define *last-fps* (make-parameter 0))
     (define *last-time* (make-parameter 0))
     ;; Оптимизация: создаём объект каретки один раз
     (define *carret-obj* (make-carret ""))
@@ -205,8 +212,13 @@
             (last-time (*last-time*)))
         (when (>= (- curr-second last-time) 1)
           (*last-time* curr-second)
-          (draw-fps (*fps-counter*) debug-context GW GH)
+          (*last-fps* (*fps-counter*))
           (*fps-counter* 0)))
+      
+      ;; Отображение дебаг информации (независимо от FPS)
+      (if (get-debug-info)
+          (draw-debug-info (*last-fps*) debug-context GW GH)
+          (clear-rect debug-context 0.0 0.0 GW GH))
 
       ;; (unless completed?
       (draw-bg bg bg-context GW GH)

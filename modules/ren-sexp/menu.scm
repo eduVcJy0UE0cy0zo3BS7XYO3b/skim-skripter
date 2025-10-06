@@ -34,6 +34,7 @@
   '(("Text Speed" . text-speed)
     ("Volume" . volume)
     ("Fullscreen" . fullscreen)
+    ("Debug Info" . debug-info)
     ("Back" . back)))
 
 (define *credits-menu-items*
@@ -89,4 +90,5 @@
       ('text-speed 'adjust-text-speed)
       ('volume 'adjust-volume)
       ('fullscreen 'toggle-fullscreen)
+      ('debug-info 'toggle-debug-info)
       (_ 'no-action))))
