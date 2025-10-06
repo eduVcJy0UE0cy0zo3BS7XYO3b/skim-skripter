@@ -19,7 +19,9 @@
             set-debug-info!
             toggle-debug-info!
             stop-current-music!
-            get-current-audio))
+            get-current-audio
+            get-current-music-path
+            set-current-music-path!))
 
 (define (init-settings!)
   (let ((volume (get-item "volume"))
@@ -40,6 +42,9 @@
 
 ;; Глобальная переменная для текущего аудио
 (define *current-audio* #f)
+
+;; Глобальная переменная для пути текущей музыки
+(define *current-music-path* #f)
 
 (define (get-text-speed)
   (let ((speed-str (get-item "text-speed")))
@@ -144,4 +149,13 @@
 (define (stop-current-music!)
   (when *current-audio*
     (media-pause *current-audio*)
-    (set! *current-audio* #f)))
+    (set! *current-audio* #f)
+    (set! *current-music-path* #f)))
+
+;; Получить путь текущей музыки
+(define (get-current-music-path)
+  *current-music-path*)
+
+;; Установить путь текущей музыки
+(define (set-current-music-path! path)
+  (set! *current-music-path* path))

@@ -47,9 +47,7 @@
    #:text "Hello and Welcome to this new super visual novel engine!  Press <SPACE> to launch the game."))
 
 (define music:curious_critters
-  (let ((music (make-music (audio:curious_critters) 100 "resources/bgm/curious_critters_extended.mp3")))
-    (pk "CREATED MUSIC:CURIOUS_CRITTERS with path:" (music-path music))
-    music))
+  (make-music (audio:curious_critters) 100 "resources/bgm/curious_critters_extended.mp3"))
 
 (define nastya:tired
   (make-sprite (image:nastya-tired) 1000 'left 'nastya 'tired 'casual "resources/sprites/nastya_tired_1600.webp"))
@@ -70,12 +68,11 @@
   (make-sprite (image:masha-normal) 1000 'right 'masha 'normal 'casual "resources/sprites/masha_normal_1600.png"))
 
 (define bg:kitchen
-  (let ((bg (%make-bg (image:kitchen) 1000 "resources/bg/bg_kitchen.jpeg")))
-    (pk "CREATED BG:KITCHEN with path:" (bg-path bg))
-    bg))
+  (%make-bg (image:kitchen) 1000 "resources/bg/bg_kitchen.jpeg"))
 
 (define END
   (make-scene #:bg (make-bg-with-path (image:end) "resources/bg/end.png")))
+
 (define script
   (->> (list WELCOME)
        (CLEAN)

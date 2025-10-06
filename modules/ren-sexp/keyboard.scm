@@ -42,18 +42,28 @@
 
 ;; Универсальная функция для обработки взаимодействия (клик/клавиша)
 (define (handle-interaction! state-box)
-  (let* ((state (atomic-box-ref state-box))
-         (current (assoc-ref state 'current-scene))
-	 (remote  (assoc-ref state 'current-story-scene)))
-    ;; Проверяем флаг автоматического полноэкранного режима
-    (when (get-auto-fullscreen-on-first-interaction)
-      (pk "Auto-activating fullscreen on first interaction")
-      (toggle-fullscreen-stage)
-      (set-auto-fullscreen-on-first-interaction! #f))  ; Отключаем после первого использования
-    
-    (if (equal? current remote)
-	(append-empty-scene! state-box current remote (make-scene))
-	(atomic-update-current-scene state-box remote))))
+  ;; Проверяем, что мы в игровом режиме, а не в меню
+  (when (is-in-game?)
+    (let* ((state (atomic-box-ref state-box))
+           (current (assoc-ref state 'current-scene))
+           (remote  (assoc-ref state 'current-story-scene)))
+      ;; Если есть отложенная story-scene, используем её
+      (when (get-pending-story-scene)
+        (set! remote (get-pending-story-scene))
+        (clear-pending-story-scene!)
+        ;; Обновляем состояние с правильной story-scene
+        (atomic-box-set! state-box
+          `((current-scene . ,current)
+            (current-story-scene . ,remote)
+            (counter . ,(assoc-ref state 'counter)))))
+      ;; Проверяем флаг автоматического полноэкранного режима
+      (when (get-auto-fullscreen-on-first-interaction)
+        (toggle-fullscreen-stage)
+        (set-auto-fullscreen-on-first-interaction! #f))  ; Отключаем после первого использования
+      
+      (if (equal? current remote)
+          (append-empty-scene! state-box current remote (make-scene))
+          (atomic-update-current-scene state-box remote)))))
 
 ;; Обёртка для обратной совместимости
 (define (complete-or-begin-new-scene! state-box)
@@ -95,7 +105,7 @@
        (begin
          (set-menu-state! (make-menu-state 'credits 0 'main-menu))
          (set-game-mode! 'menu)))     ; Переход в credits
-      ('exit (pk "Game exit requested"))
+      ('exit #t)
       (_ #t))))
 
 ;; Обработка клавиш в игровом меню
@@ -160,15 +170,11 @@
             ('load
              (if (and exists compatible)
                  (begin
-                   (pk "Loading game from slot" slot-number)
                    (load-game slot-number state-box)
                    (set-game-mode! 'game))
-                 (if (not exists)
-                     (pk "Slot is empty")
-                     (pk "Save is incompatible"))))
+                 #f))
             ('save
              (begin
-               (pk "Saving game to slot" slot-number)
                (save-game slot-number state-box)
                (set-game-mode! 'game))))))))
 
@@ -189,11 +195,10 @@
     ('Digit2	(set-text-speed! 1.0))  ; 2 - нормально
     ('Digit3	(set-text-speed! 1.5))  ; 3 - быстро
     ('Digit4	(set-text-speed! 2.0))  ; 4 - очень быстро
-    ('KeyF	(pk "F key pressed, calling toggle-fullscreen-stage") (toggle-fullscreen-stage)) ; F - переключить полноэкранный режим
-    ('F11	(pk "F11 key pressed, calling toggle-fullscreen-stage") (toggle-fullscreen-stage)) ; F11 - переключить полноэкранный режим
+    ('KeyF	(toggle-fullscreen-stage)) ; F - переключить полноэкранный режим
+    ('F11	(toggle-fullscreen-stage)) ; F11 - переключить полноэкранный режим
     ('ShiftF11 (begin ; Shift+F11 - переключить автоматический полноэкранный режим
-                 (set-fullscreen-preference! (not (get-fullscreen-preference)))
-                 (pk "Fullscreen preference toggled to:" (get-fullscreen-preference))))
+                 (set-fullscreen-preference! (not (get-fullscreen-preference)))))
     ('Backquote (toggle-debug-info!)) ; ` (тильда) - переключить дебаг информацию
     (_ #t)))
 
@@ -223,5 +228,4 @@
      "click"
      (procedure->external
       (lambda (event)
-        (pk "Click detected, calling handle-interaction!")
         (handle-interaction! state-box))))))

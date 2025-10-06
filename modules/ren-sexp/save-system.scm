@@ -9,6 +9,7 @@
   #:use-module (ren-sexp sprites)
   #:use-module (ren-sexp game-state)
   #:use-module (ren-sexp settings)
+  #:use-module (dom fullscreen)
   #:use-module (version)
   #:export (save-game
             load-game
@@ -18,6 +19,8 @@
             get-save-slots
             set-game-script!
             get-game-script
+            get-pending-story-scene
+            clear-pending-story-scene!
             extract-scene-recipe
             rebuild-scene-from-recipe))
 
@@ -56,6 +59,9 @@
 ;; Глобальная переменная для хранения скрипта игры
 (define *game-script* '())
 
+;; Переменная для хранения отложенной story-scene после загрузки
+(define *pending-story-scene* #f)
+
 ;; Установить скрипт игры
 (define (set-game-script! script)
   (set! *game-script* script))
@@ -63,6 +69,14 @@
 ;; Получить скрипт игры
 (define (get-game-script)
   *game-script*)
+
+;; Получить отложенную story-scene
+(define (get-pending-story-scene)
+  *pending-story-scene*)
+
+;; Очистить отложенную story-scene
+(define (clear-pending-story-scene!)
+  (set! *pending-story-scene* #f))
 
 ;; Получить текущее время как число
 (define (current-timestamp)
@@ -74,16 +88,6 @@
         (music (scene-music scene))
         (sprites (scene-sprites scene))
         (old-text (scene-old-text scene)))
-    ;; Отладочный вывод
-    (pk "=== EXTRACT SCENE RECIPE ===")
-    (pk "BG:" bg)
-    (when bg (pk "BG-PATH:" (bg-path bg)))
-    (pk "MUSIC:" music)
-    (when music (pk "MUSIC-PATH:" (music-path music)))
-    (pk "SPRITES COUNT:" (length sprites))
-    (when (not (null? sprites))
-      (pk "FIRST SPRITE:" (car sprites))
-      (pk "FIRST SPRITE PATH:" (sprite-path (car sprites))))
     
     `((background . ,(if (and bg (bg-path bg)) (bg-path bg) #f))
       (music . ,(if (and music (music-path music)) (music-path music) #f))
@@ -133,12 +137,6 @@
          (current-story-scene (assoc-ref state 'current-story-scene))
          (counter (assoc-ref state 'counter)))
     
-    (pk "=== SAVE GAME DEBUG ===")
-    (pk "COUNTER:" counter)
-    (pk "CURRENT-SCENE:" current-scene)
-    (pk "CURRENT-STORY-SCENE:" current-story-scene)
-    (pk "SCENES EQUAL?" (equal? current-scene current-story-scene))
-    
     (let* ((scene-recipe (extract-scene-recipe current-scene))
            (save-data `((game_version . ,GAME_VERSION)
                         (counter . ,counter)
@@ -157,31 +155,34 @@
             (scene-recipe (assoc-ref save-data 'scene_state)))
         ;; Переключаемся в игровой режим
         (set-game-mode! 'game)
+        ;; Отключаем автоматический fullscreen, чтобы избежать лишнего handle-interaction
+        (set-auto-fullscreen-on-first-interaction! #f)
         ;; Восстанавливаем сцену из рецепта
         (let ((restored-scene (if scene-recipe
                                   (rebuild-scene-from-recipe scene-recipe)
                                   (make-scene))))
-          ;; Устанавливаем состояние игры с восстановленной сценой
-          (let ((story-scene (if (and (< counter (length *game-script*))
-                                      (>= counter 0))
-                                 (list-ref *game-script* counter)
-                                 (make-scene))))
+          ;; Получаем story-scene из скрипта и синхронизируем её музыку с восстановленной сценой
+          (let* ((story-scene-base (if (and (< counter (length *game-script*))
+                                           (>= counter 0))
+                                      (list-ref *game-script* counter)
+                                      (make-scene)))
+                 ;; Синхронизируем музыку story-scene с restored-scene
+                 (story-scene (scene-update-music story-scene-base (scene-music restored-scene))))
             (atomic-box-set! state-box 
               `((current-scene . ,restored-scene)
                 (current-story-scene . ,story-scene)
                 (counter . ,counter)))
-            (pk "LOADED SCENE:" restored-scene)
-            (pk "STORY SCENE:" story-scene))
-          ;; Останавливаем текущую музыку и запускаем новую если есть
-          (stop-current-music!) ; Останавливаем любую играющую музыку
-          (let ((music (scene-music restored-scene)))
-            (when music
-              (pk "STARTING MUSIC:" music)
-              (pk "MUSIC AUDIO:" (music-audio music))
-              (pk "MUSIC PATH:" (music-path music))
-              (let ((audio-element (set-current-volume (music-audio music))))
-                (media-play audio-element)
-                (set-media-loop! audio-element 1)
-                (pk "MUSIC STARTED")))))
-        #t))))
+            ;; Запускаем музыку только если это другой файл
+            (let ((music (scene-music restored-scene)))
+              (when music
+                (let ((current-audio (get-current-audio)))
+                  (when (or (not current-audio)
+                            (not (string=? (get-current-music-path) (music-path music))))
+                    (stop-current-music!)
+                    (let ((audio-element (set-current-volume (music-audio music))))
+                      (media-play audio-element)
+                      (set-media-loop! audio-element 1)
+                      (set-current-music-path! (music-path music)))))))
+            )))
+        #t)))
 
