@@ -193,6 +193,11 @@
       (clear-rect text-context 0.0 0.0 GW GH)
       (draw-menu text-context GW GH))
     
+    ;; Отрисовка меню сохранений/загрузки
+    (define (draw-save-menu-interface menu-type)
+      (clear-rect text-context 0.0 0.0 GW GH)
+      (draw-save-menu text-context GW GH menu-type))
+    
     ;; Отрисовка игры
     (define (draw-game-interface completed? scene next)
       ;; Восстанавливаем настройки текстового контекста после меню
@@ -277,6 +282,12 @@
           ((is-in-menu?)
            ;; Отрисовка игрового меню
            (draw-menu-interface))
+          ((is-in-load-menu?)
+           ;; Отрисовка меню загрузки
+           (draw-save-menu-interface 'load))
+          ((is-in-save-menu?)
+           ;; Отрисовка меню сохранения
+           (draw-save-menu-interface 'save))
           (else
            ;; Обычная отрисовка игры
            (draw-game-interface completed? scene next)))))

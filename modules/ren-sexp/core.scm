@@ -16,6 +16,7 @@
   #:use-module (ren-sexp bg)
   #:use-module (ren-sexp sprites)
   #:use-module (ren-sexp keyboard)
+  #:use-module (ren-sexp save-system)
   #:use-module (ren-sexp update)
   #:export (black-screen init init-main-menu))
 

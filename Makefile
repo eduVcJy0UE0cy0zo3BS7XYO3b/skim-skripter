@@ -32,13 +32,21 @@ modules = \
   modules/ren-sexp/menu.scm \
   modules/ren-sexp/menu-draw.scm \
   modules/ren-sexp/main-menu.scm \
+  modules/ren-sexp/save-system.scm \
+  modules/ren-sexp/save-menu.scm \
   modules/repl-environment.scm \
   modules/repl.scm \
   demo/assets.scm \
   modules/ren-sexp/utils.scm
 
-game.wasm: game.scm $(modules)
-	HOOT_LOAD_PATH=$(HOOT_LP) guix shell guile-next guile-hoot -- $(GUILD) compile-wasm --async -L $(GOBLINS_PATH)  -L modules -L . -o $@ $<
+version.scm:
+	echo "(define-module (version)" > version.scm
+	echo "  #:export (GAME_VERSION))" >> version.scm
+	echo "" >> version.scm
+	echo "(define GAME_VERSION \"v1.0-$(shell git rev-parse --short HEAD)\")" >> version.scm
+
+game.wasm: version.scm game.scm $(modules)
+	HOOT_LOAD_PATH=$(HOOT_LP) guix shell guile-next guile-hoot -- $(GUILD) compile-wasm --async -L $(GOBLINS_PATH)  -L modules -L . -o $@ game.scm
 
 game.scm: game.org
 	emacs --batch --eval "(require 'org)" --eval '(org-babel-tangle-file "game.org")'

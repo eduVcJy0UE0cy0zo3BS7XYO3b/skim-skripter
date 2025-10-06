@@ -11,21 +11,25 @@
             get-menu-state
             set-menu-state!
             navigate-menu
-            select-menu-item))
+            select-menu-item
+            get-current-menu-items
+            menu-state-came-from))
 
 ;; Типы меню
 (define-record-type <menu-state>
-  (make-menu-state current-menu selected-item)
+  (make-menu-state current-menu selected-item came-from)
   menu-state?
   (current-menu menu-state-current-menu)
-  (selected-item menu-state-selected-item))
+  (selected-item menu-state-selected-item)
+  (came-from menu-state-came-from))
 
 ;; Глобальное состояние меню
-(define *menu-state* (make-menu-state 'main 0))
+(define *menu-state* (make-menu-state 'main 0 'game))
 
 ;; Определения меню
 (define *main-menu-items* 
   '(("Continue" . continue)
+    ("Save Game" . save-game)
     ("Settings" . settings)
     ("Credits" . credits)
     ("Exit" . exit)))
@@ -73,7 +77,9 @@
                                  0))
                       (_ current-index))))
     (set! *menu-state* 
-          (make-menu-state (menu-state-current-menu *menu-state*) new-index))))
+          (make-menu-state (menu-state-current-menu *menu-state*) 
+                          new-index 
+                          (menu-state-came-from *menu-state*)))))
 
 ;; Выбор элемента меню
 (define (select-menu-item)
@@ -83,10 +89,16 @@
          (action (cdr selected-item)))
     (match action
       ('continue 'continue-game)
-      ('settings (set! *menu-state* (make-menu-state 'settings 0)) 'menu-changed)
-      ('credits (set! *menu-state* (make-menu-state 'credits 0)) 'menu-changed)
+      ('save-game 'save-game)
+      ('settings (set! *menu-state* (make-menu-state 'settings 0 (menu-state-came-from *menu-state*))) 'menu-changed)
+      ('credits (set! *menu-state* (make-menu-state 'credits 0 (menu-state-came-from *menu-state*))) 'menu-changed)
       ('exit 'exit-game)
-      ('back (set! *menu-state* (make-menu-state 'main 0)) 'menu-changed)
+      ('back 
+       (let ((came-from (menu-state-came-from *menu-state*)))
+         (set! *menu-state* (make-menu-state 'main 0 came-from))
+         (if (eq? came-from 'main-menu)
+             'back-to-main-menu
+             'menu-changed)))
       ('text-speed 'adjust-text-speed)
       ('volume 'adjust-volume)
       ('fullscreen 'toggle-fullscreen)

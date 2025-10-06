@@ -4,10 +4,12 @@
             set-game-mode!
             is-in-menu?
             is-in-game?
-            is-in-main-menu?))
+            is-in-main-menu?
+            is-in-load-menu?
+            is-in-save-menu?))
 
 ;; Режимы игры
-(define *game-mode* 'main-menu) ; 'main-menu, 'game, 'menu
+(define *game-mode* 'main-menu) ; 'main-menu, 'game, 'menu, 'load-menu, 'save-menu
 
 ;; Получить текущий режим игры
 (define (get-game-mode)
@@ -26,3 +28,9 @@
 
 (define (is-in-main-menu?)
   (eq? *game-mode* 'main-menu))
+
+(define (is-in-load-menu?)
+  (eq? *game-mode* 'load-menu))
+
+(define (is-in-save-menu?)
+  (eq? *game-mode* 'save-menu))

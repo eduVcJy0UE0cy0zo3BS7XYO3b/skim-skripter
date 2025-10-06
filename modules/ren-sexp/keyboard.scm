@@ -12,29 +12,25 @@
   #:use-module (ren-sexp settings)
   #:use-module (ren-sexp menu)
   #:use-module (ren-sexp main-menu)
+  #:use-module (ren-sexp save-system)
+  #:use-module (ren-sexp save-menu)
   #:use-module (ren-sexp game-state)
   #:use-module (dom fullscreen)
   #:export (add-key-up-listener!
             add-click-listener!
             handle-interaction!
             start-game!
-            set-game-script!))
+            ))
 
-;; Глобальная переменная для хранения скрипта игры
-(define *game-script* '())
-
-;; Установить скрипт игры
-(define (set-game-script! script)
-  (set! *game-script* script))
 
 ;; Начать игру
 (define (start-game! state-box)
   (set-game-mode! 'game)
   ;; Устанавливаем состояние игры с первой сценой из скрипта
-  (when (not (null? *game-script*))
+  (when (not (null? (get-game-script)))
     (atomic-box-set! state-box 
       `((current-scene . ,(make-scene))
-        (current-story-scene . ,(car *game-script*))
+        (current-story-scene . ,(car (get-game-script)))
         (counter . 0)))))
 
 ;; Универсальная функция для обработки взаимодействия (клик/клавиша)
@@ -79,8 +75,19 @@
   (let ((action (select-main-menu-item)))
     (match action
       ('start-game (start-game! state-box))
-      ('settings (set-game-mode! 'menu))  ; Переход в настройки
-      ('credits (set-game-mode! 'menu))   ; Переход в credits
+      ('new-game (start-game! state-box))   ; То же что start-game
+      ('load-game 
+       (begin
+         (init-save-menu 'load)
+         (set-game-mode! 'load-menu))) ; Переход в меню загрузки
+      ('settings 
+       (begin
+         (set-menu-state! (make-menu-state 'settings 0 'main-menu))
+         (set-game-mode! 'menu)))    ; Переход в настройки
+      ('credits 
+       (begin
+         (set-menu-state! (make-menu-state 'credits 0 'main-menu))
+         (set-game-mode! 'menu)))     ; Переход в credits
       ('exit (pk "Game exit requested"))
       (_ #t))))
 
@@ -90,7 +97,25 @@
     ('ArrowUp (navigate-menu 'up))
     ('ArrowDown (navigate-menu 'down))
     ('Enter (handle-menu-selection))
-    ('Escape (set-game-mode! 'game)) ; Вернуться в игру
+    ('Escape 
+     (let ((came-from (menu-state-came-from (get-menu-state))))
+       (if (eq? came-from 'main-menu)
+           (set-game-mode! 'main-menu)
+           (set-game-mode! 'game)))) ; Вернуться туда, откуда пришли
+    ('KeyF (toggle-fullscreen-stage))
+    ('F11 (toggle-fullscreen-stage))
+    (_ #t)))
+
+;; Обработка клавиш в меню загрузки/сохранения
+(define (handle-save-menu-keys key state-box)
+  (match key
+    ('ArrowUp (navigate-save-menu 'up))
+    ('ArrowDown (navigate-save-menu 'down))
+    ('Enter (handle-save-menu-selection state-box))
+    ('Escape (cond
+              ((is-in-load-menu?) (set-game-mode! 'main-menu))
+              ((is-in-save-menu?) (set-game-mode! 'menu))
+              (else (set-game-mode! 'main-menu)))) ; Вернуться назад
     ('KeyF (toggle-fullscreen-stage))
     ('F11 (toggle-fullscreen-stage))
     (_ #t)))
@@ -100,18 +125,54 @@
   (let ((action (select-menu-item)))
     (match action
       ('continue-game (set-game-mode! 'game))
+      ('save-game 
+       (begin
+         (init-save-menu 'save)
+         (set-game-mode! 'save-menu))) ; Переход в меню сохранения
       ('exit-game (set-game-mode! 'main-menu)) ; Вернуться в главное меню
+      ('back-to-main-menu (set-game-mode! 'main-menu)) ; Вернуться в главное меню
       ('adjust-text-speed #t) ; Будет обрабатываться отдельно
       ('adjust-volume #t)     ; Будет обрабатываться отдельно
       ('toggle-fullscreen (toggle-fullscreen-stage))
       ('toggle-debug-info (toggle-debug-info!))
       (_ #t))))
 
+;; Обработка выбора в меню сохранений/загрузки
+(define (handle-save-menu-selection state-box)
+  (let ((selection (select-save-menu-item)))
+    (if (eq? selection 'back)
+        (cond
+          ((is-in-load-menu?) (set-game-mode! 'main-menu))
+          ((is-in-save-menu?) (set-game-mode! 'menu))
+          (else (set-game-mode! 'main-menu)))
+        (let ((action-type (car selection))
+              (slot-number (cadr selection))
+              (exists (caddr selection))
+              (compatible (cadddr selection)))
+          (match action-type
+            ('load
+             (if (and exists compatible)
+                 (begin
+                   (pk "Loading game from slot" slot-number)
+                   (load-game slot-number state-box)
+                   (set-game-mode! 'game))
+                 (if (not exists)
+                     (pk "Slot is empty")
+                     (pk "Save is incompatible"))))
+            ('save
+             (begin
+               (pk "Saving game to slot" slot-number)
+               (save-game slot-number state-box)
+               (set-game-mode! 'game))))))))
+
 ;; Обработка клавиш в игре
 (define (handle-game-keys key state-box)
   (match key
     ('Space	(complete-or-begin-new-scene! state-box))
-    ('Escape (set-game-mode! 'menu)) ; Открыть меню
+    ('Escape 
+     (begin
+       (set-menu-state! (make-menu-state 'main 0 'game))
+       (set-game-mode! 'menu))) ; Открыть меню
     ('Equal	(set-text-speed! (+ (get-text-speed) 0.1))) ; + увеличить скорость
     ('Minus	(set-text-speed! (- (get-text-speed) 0.1))) ; - уменьшить скорость
     ('BracketRight (set-volume! (+ (get-volume) 0.1))) ; ] увеличить громкость
@@ -140,6 +201,9 @@
         ((is-in-menu?)
          ;; Обработка клавиш в игровом меню
          (handle-menu-keys key))
+        ((or (is-in-load-menu?) (is-in-save-menu?))
+         ;; Обработка клавиш в меню сохранений/загрузки
+         (handle-save-menu-keys key state-box))
         (else
          ;; Обработка клавиш в игре
          (handle-game-keys key state-box))))))
