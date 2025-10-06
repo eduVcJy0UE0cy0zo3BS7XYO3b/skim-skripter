@@ -11,9 +11,12 @@
   #:use-module (ren-sexp utils)
   #:use-module (ren-sexp settings)
   #:use-module (dom fullscreen)
-  #:export (add-key-up-listener!))
+  #:export (add-key-up-listener!
+            add-click-listener!
+            handle-interaction!))
 
-(define (complete-or-begin-new-scene! state-box)
+;; Универсальная функция для обработки взаимодействия (клик/клавиша)
+(define (handle-interaction! state-box)
   (let* ((state (atomic-box-ref state-box))
          (current (assoc-ref state 'current-scene))
 	 (remote  (assoc-ref state 'current-story-scene)))
@@ -26,6 +29,10 @@
     (if (equal? current remote)
 	(append-empty-scene! state-box current remote (make-scene))
 	(atomic-update-current-scene state-box remote))))
+
+;; Обёртка для обратной совместимости
+(define (complete-or-begin-new-scene! state-box)
+  (handle-interaction! state-box))
 
 (define (add-key-up-listener! state-box)
   (add-event-listener!
@@ -59,3 +66,14 @@
 		     (set-fullscreen-preference! (not (get-fullscreen-preference)))
 		     (pk "Fullscreen preference toggled to:" (get-fullscreen-preference))))
 	(_ #t)))))
+
+;; Добавить обработчик кликов на stage
+(define (add-click-listener! state-box)
+  (let ((stage (get-element-by-id "stage")))
+    (add-event-listener!
+     stage
+     "click"
+     (procedure->external
+      (lambda (event)
+        (pk "Click detected, calling handle-interaction!")
+        (handle-interaction! state-box))))))

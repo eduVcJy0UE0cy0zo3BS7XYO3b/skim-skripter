@@ -41,6 +41,7 @@
                        (counter . 0))))
   (define update-and-draw-callback (init-update state-box))
   (add-key-up-listener! state-box)
+  (add-click-listener! state-box)
   (then (load-font (ptsans-font))
 	(procedure->external
 	 (lambda (font)
