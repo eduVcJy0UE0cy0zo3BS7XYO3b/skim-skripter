@@ -31,6 +31,7 @@ modules = \
   modules/ren-sexp/game-state.scm \
   modules/ren-sexp/menu.scm \
   modules/ren-sexp/menu-draw.scm \
+  modules/ren-sexp/main-menu.scm \
   modules/repl-environment.scm \
   modules/repl.scm \
   demo/assets.scm \

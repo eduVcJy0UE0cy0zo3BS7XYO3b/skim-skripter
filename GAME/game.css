@@ -1,0 +1,158 @@
+@media (min-width: 1000px) {
+    .container {
+        margin-left: 4rem;
+        margin-right: 4rem;
+        max-width: 80em;
+    }
+}
+
+@media (max-width: 1000px) {
+    .container {
+        margin-left: 0.25rem;
+        margin-right: 0.25rem;
+    }
+}
+
+h1 {
+    text-align: center;
+}
+
+.repl-text {
+    color: #e0ceed;
+    background-color: #110e13;
+    font-size: 40pt;
+    font-family: monospace;
+}
+
+.repl {
+    display: flex;
+    flex-direction: column;
+    white-space: pre;
+    padding: 1rem;
+    border-radius: 4px;
+    height: calc(100vh - 3rem);
+    overflow: auto;
+}
+
+.repl .log {
+    white-space: pre-wrap;
+    color: #e0ceed;
+}
+
+.repl .prompt {
+    white-space: pre;
+    display: flex;
+}
+
+.repl .prompt textarea {
+    flex-grow: 100;
+    border: 0;
+    padding: 0;
+    color: #e0ceed;
+    background-color: #110e13;
+}
+
+.repl .prompt textarea:focus {
+    outline:none;
+}
+
+body {
+    /* background-color: #000; */
+    margin: 0;
+    width: 100vw;
+    height: 100vh;
+}
+
+#stage {
+    position: relative;
+    width: 1920px;
+    height: 1080px;
+    margin-bottom: 10px;
+}
+
+canvas {
+    position: absolute;
+}
+
+#all-canvas {
+    /* display: block; */
+    /* margin: 0 auto; */
+    z-index: 1;
+}
+
+#gray-canvas {
+    z-index: 2;
+}
+
+#text-canvas {
+    z-index: 3;
+}
+
+#carret-canvas {
+    z-index: 4;
+}
+
+#old-text-canvas {
+    z-index: 5;
+}
+
+#menu-canvas {
+    z-index: 6;
+}
+
+#debug-canvas {
+    z-index: 7;
+}
+
+/* Стили для полноэкранного режима */
+#stage:fullscreen {
+    width: 100vw !important;
+    height: 100vh !important;
+    background-color: #000 !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    z-index: 9999 !important;
+}
+
+#stage:fullscreen canvas {
+    position: absolute !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    /* Динамическое масштабирование: максимальный размер с сохранением пропорций 16:9 */
+    width: min(95vw, calc(95vh * 16 / 9)) !important;
+    height: min(95vh, calc(95vw * 9 / 16)) !important;
+    object-fit: contain !important;
+    /* Сохраняем соотношение сторон 16:9 */
+    aspect-ratio: 16/9 !important;
+}
+
+/* Webkit полноэкранный режим */
+#stage:-webkit-full-screen {
+    width: 100vw !important;
+    height: 100vh !important;
+    background-color: #000 !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+#stage:-webkit-full-screen canvas {
+    position: absolute !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    /* Динамическое масштабирование: максимальный размер с сохранением пропорций 16:9 */
+    width: min(95vw, calc(95vh * 16 / 9)) !important;
+    height: min(95vh, calc(95vw * 9 / 16)) !important;
+    object-fit: contain !important;
+    aspect-ratio: 16/9 !important;
+}

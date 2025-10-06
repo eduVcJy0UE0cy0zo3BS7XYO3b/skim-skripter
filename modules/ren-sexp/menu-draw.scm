@@ -2,8 +2,9 @@
   #:use-module (ice-9 match)
   #:use-module (dom canvas)
   #:use-module (ren-sexp menu)
+  #:use-module (ren-sexp main-menu)
   #:use-module (ren-sexp settings)
-  #:export (draw-menu))
+  #:export (draw-menu draw-main-menu))
 
 ;; Настройки отображения меню
 (define MENU_BG_COLOR "rgba(0, 0, 0, 0.8)")
@@ -92,5 +93,60 @@
             (when is-selected
               (fill-text context ">" (- (/ W 2) 200) y-pos)
               (fill-text context "<" (+ (/ W 2) 200) y-pos)))
+          
+          (loop (cdr items-list) (+ index 1)))))))
+
+;; Отрисовка главного меню
+(define (draw-main-menu context W H)
+  (let* ((menu-state (get-main-menu-state))
+         (selected-item (main-menu-state-selected-item menu-state)))
+    
+    ;; Черный фон
+    (set-fill-color! context "rgba(0, 0, 0, 1.0)")
+    (fill-rect context 0 0 W H)
+    
+    ;; Заголовок игры
+    (set-fill-color! context "#00ff00")
+    (set-font! context "bold 72px PTSans")
+    (set-text-align! context "center")
+    (fill-text context "SKIM SKRIPTER" (/ W 2) 200)
+    
+    ;; Подзаголовок
+    (set-fill-color! context "#ffffff")
+    (set-font! context "bold 24px PTSans")
+    (fill-text context "Visual Novel Engine" (/ W 2) 250)
+    
+    ;; Элементы меню
+    (set-font! context "bold 36px PTSans")
+    (draw-main-menu-items context W H selected-item)))
+
+;; Отрисовка элементов главного меню
+(define (draw-main-menu-items context W H selected-item)
+  (let* ((items '(("Start Game" . start-game)
+                  ("Settings" . settings) 
+                  ("Credits" . credits)
+                  ("Exit" . exit)))
+         (start-y 400)
+         (item-height 80))
+    
+    (let loop ((items-list items) (index 0))
+      (when (not (null? items-list))
+        (let* ((item (car items-list))
+               (text (car item))
+               (action (cdr item))
+               (y-pos (+ start-y (* index item-height)))
+               (is-selected (= index selected-item)))
+          
+          ;; Цвет текста
+          (set-fill-color! context 
+                           (if is-selected MENU_SELECTED_COLOR MENU_TEXT_COLOR))
+          
+          ;; Отрисовка текста
+          (fill-text context text (/ W 2) y-pos)
+          
+          ;; Индикатор выбора
+          (when is-selected
+            (fill-text context ">" (- (/ W 2) 200) y-pos)
+            (fill-text context "<" (+ (/ W 2) 200) y-pos))
           
           (loop (cdr items-list) (+ index 1)))))))

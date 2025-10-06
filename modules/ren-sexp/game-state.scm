@@ -3,10 +3,11 @@
   #:export (get-game-mode
             set-game-mode!
             is-in-menu?
-            is-in-game?))
+            is-in-game?
+            is-in-main-menu?))
 
 ;; Режимы игры
-(define *game-mode* 'game) ; 'game, 'menu
+(define *game-mode* 'main-menu) ; 'main-menu, 'game, 'menu
 
 ;; Получить текущий режим игры
 (define (get-game-mode)
@@ -22,3 +23,6 @@
 
 (define (is-in-game?)
   (eq? *game-mode* 'game))
+
+(define (is-in-main-menu?)
+  (eq? *game-mode* 'main-menu))

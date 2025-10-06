@@ -183,7 +183,12 @@
     (define *cached-sprites* (make-parameter '()))
     (define *cached-reversed-old-text* (make-parameter '()))
     
-    ;; Отрисовка меню
+    ;; Отрисовка главного меню
+    (define (draw-main-menu-interface)
+      (clear-rect text-context 0.0 0.0 GW GH)
+      (draw-main-menu text-context GW GH))
+    
+    ;; Отрисовка игрового меню
     (define (draw-menu-interface)
       (clear-rect text-context 0.0 0.0 GW GH)
       (draw-menu text-context GW GH))
@@ -264,11 +269,16 @@
         ;; (pk state)
 	(define completed? (equal? scene next))
         
-        ;; Проверяем, находимся ли мы в меню
-        (if (is-in-menu?)
-            ;; Отрисовка меню
-            (draw-menu-interface)
-            ;; Обычная отрисовка игры
-            (draw-game-interface completed? scene next))))
+        ;; Проверяем текущий режим игры
+        (cond
+          ((is-in-main-menu?)
+           ;; Отрисовка главного меню
+           (draw-main-menu-interface))
+          ((is-in-menu?)
+           ;; Отрисовка игрового меню
+           (draw-menu-interface))
+          (else
+           ;; Обычная отрисовка игры
+           (draw-game-interface completed? scene next)))))
     
     draw))

@@ -123,5 +123,5 @@
   (call-with-async-result
    resolved rejected
    (lambda ()
-     (init (reverse script))
+     (init-main-menu (reverse script))
      42)))

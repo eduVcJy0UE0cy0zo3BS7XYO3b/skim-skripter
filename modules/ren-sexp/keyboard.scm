@@ -11,11 +11,31 @@
   #:use-module (ren-sexp utils)
   #:use-module (ren-sexp settings)
   #:use-module (ren-sexp menu)
+  #:use-module (ren-sexp main-menu)
   #:use-module (ren-sexp game-state)
   #:use-module (dom fullscreen)
   #:export (add-key-up-listener!
             add-click-listener!
-            handle-interaction!))
+            handle-interaction!
+            start-game!
+            set-game-script!))
+
+;; Глобальная переменная для хранения скрипта игры
+(define *game-script* '())
+
+;; Установить скрипт игры
+(define (set-game-script! script)
+  (set! *game-script* script))
+
+;; Начать игру
+(define (start-game! state-box)
+  (set-game-mode! 'game)
+  ;; Устанавливаем состояние игры с первой сценой из скрипта
+  (when (not (null? *game-script*))
+    (atomic-box-set! state-box 
+      `((current-scene . ,(make-scene))
+        (current-story-scene . ,(car *game-script*))
+        (counter . 0)))))
 
 ;; Универсальная функция для обработки взаимодействия (клик/клавиша)
 (define (handle-interaction! state-box)
@@ -43,13 +63,34 @@
    (procedure->external
     (init-keyboard state-box))))
 
-;; Обработка клавиш в меню
+;; Обработка клавиш в главном меню
+(define (handle-main-menu-keys key state-box)
+  (match key
+    ('ArrowUp (navigate-main-menu 'up))
+    ('ArrowDown (navigate-main-menu 'down))
+    ('Enter (handle-main-menu-selection state-box))
+    ('KeyF (toggle-fullscreen-stage))
+    ('F11 (toggle-fullscreen-stage))
+    ('Backquote (toggle-debug-info!))
+    (_ #t)))
+
+;; Обработка выбора в главном меню
+(define (handle-main-menu-selection state-box)
+  (let ((action (select-main-menu-item)))
+    (match action
+      ('start-game (start-game! state-box))
+      ('settings (set-game-mode! 'menu))  ; Переход в настройки
+      ('credits (set-game-mode! 'menu))   ; Переход в credits
+      ('exit (pk "Game exit requested"))
+      (_ #t))))
+
+;; Обработка клавиш в игровом меню
 (define (handle-menu-keys key)
   (match key
     ('ArrowUp (navigate-menu 'up))
     ('ArrowDown (navigate-menu 'down))
     ('Enter (handle-menu-selection))
-    ('Escape (set-game-mode! 'game)) ; Выйти из меню
+    ('Escape (set-game-mode! 'game)) ; Вернуться в игру
     ('KeyF (toggle-fullscreen-stage))
     ('F11 (toggle-fullscreen-stage))
     (_ #t)))
@@ -59,7 +100,7 @@
   (let ((action (select-menu-item)))
     (match action
       ('continue-game (set-game-mode! 'game))
-      ('exit-game (pk "Game exit requested"))
+      ('exit-game (set-game-mode! 'main-menu)) ; Вернуться в главное меню
       ('adjust-text-speed #t) ; Будет обрабатываться отдельно
       ('adjust-volume #t)     ; Будет обрабатываться отдельно
       ('toggle-fullscreen (toggle-fullscreen-stage))
@@ -92,11 +133,16 @@
   (lambda (event)
     (let* ((key (string->symbol (keyboard-event-code event))))
       
-      (if (is-in-menu?)
-          ;; Обработка клавиш в меню
-          (handle-menu-keys key)
-          ;; Обработка клавиш в игре
-          (handle-game-keys key state-box)))))
+      (cond
+        ((is-in-main-menu?)
+         ;; Обработка клавиш в главном меню
+         (handle-main-menu-keys key state-box))
+        ((is-in-menu?)
+         ;; Обработка клавиш в игровом меню
+         (handle-menu-keys key))
+        (else
+         ;; Обработка клавиш в игре
+         (handle-game-keys key state-box))))))
 
 ;; Добавить обработчик кликов на stage
 (define (add-click-listener! state-box)
