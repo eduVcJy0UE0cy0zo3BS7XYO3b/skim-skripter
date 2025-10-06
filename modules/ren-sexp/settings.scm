@@ -4,18 +4,27 @@
             get-text-speed
             set-text-speed!
             should-add-text-char?
-            get-fullscreen-enabled
-            set-fullscreen-enabled!))
+            get-fullscreen-preference
+            set-fullscreen-preference!
+            get-auto-fullscreen-on-first-interaction
+            set-auto-fullscreen-on-first-interaction!))
 
 (define (init-settings!)
   (let ((volume (get-item "volume"))
 	(is-mute (get-item "is-mute"))
         (text-speed (get-item "text-speed"))
-        (fullscreen-enabled (get-item "fullscreen-enabled")))
+        (fullscreen-preference (get-item "fullscreen-preference")))
     (or volume (set-item! "volume" "1.0"))
     (or is-mute (set-item! "is-mute" "#f"))
     (or text-speed (set-item! "text-speed" "1.0"))
-    (or fullscreen-enabled (set-item! "fullscreen-enabled" "#f"))))
+    (or fullscreen-preference (set-item! "fullscreen-preference" "#t"))  ; По умолчанию включено
+    
+    ;; Если предпочтение полноэкранного режима включено, активируем флаг
+    (when (get-fullscreen-preference)
+      (set-auto-fullscreen-on-first-interaction! #t))))
+
+;; Глобальный флаг для автоматического полноэкранного режима
+(define *auto-fullscreen-on-first-interaction* #f)
 
 (define (get-text-speed)
   (let ((speed-str (get-item "text-speed")))
@@ -41,12 +50,19 @@
       (set! *text-frame-counter* 0))  ; сбрасываем счетчик
     should-add))  ; возвращаем true, если нужно добавить символ
 
-;; Настройки полноэкранного режима
-(define (get-fullscreen-enabled)
-  (let ((enabled-str (get-item "fullscreen-enabled")))
-    (if enabled-str
-        (string=? enabled-str "#t")
-        #f)))
+;; Настройки предпочтения полноэкранного режима
+(define (get-fullscreen-preference)
+  (let ((pref-str (get-item "fullscreen-preference")))
+    (if pref-str
+        (string=? pref-str "#t")
+        #t)))  ; По умолчанию включено
 
-(define (set-fullscreen-enabled! enabled)
-  (set-item! "fullscreen-enabled" (if enabled "#t" "#f")))
+(define (set-fullscreen-preference! enabled)
+  (set-item! "fullscreen-preference" (if enabled "#t" "#f")))
+
+;; Функции для автоматического полноэкранного режима при первом взаимодействии
+(define (get-auto-fullscreen-on-first-interaction)
+  *auto-fullscreen-on-first-interaction*)
+
+(define (set-auto-fullscreen-on-first-interaction! enabled)
+  (set! *auto-fullscreen-on-first-interaction* enabled))

@@ -45,7 +45,7 @@ serve: game.wasm
 
 bundle: game.wasm
 	rm game.zip || true
-	zip game.zip -r resources/ js-runtime/ game.js game.css game.wasm index.html favicon.ico
+	zip game.zip -r resources/ reflect-js/ game.js wtf8.wasm reflect.wasm game.css game.wasm index.html favicon.ico
 
 clean:
 	rm -f game.wasm game.zip

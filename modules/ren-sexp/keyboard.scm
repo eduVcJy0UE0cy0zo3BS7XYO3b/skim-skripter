@@ -17,6 +17,12 @@
   (let* ((state (atomic-box-ref state-box))
          (current (assoc-ref state 'current-scene))
 	 (remote  (assoc-ref state 'current-story-scene)))
+    ;; Проверяем флаг автоматического полноэкранного режима
+    (when (get-auto-fullscreen-on-first-interaction)
+      (pk "Auto-activating fullscreen on first interaction")
+      (toggle-fullscreen-stage)
+      (set-auto-fullscreen-on-first-interaction! #f))  ; Отключаем после первого использования
+    
     (if (equal? current remote)
 	(append-empty-scene! state-box current remote (make-scene))
 	(atomic-update-current-scene state-box remote))))
@@ -49,4 +55,7 @@
 	('Digit4	(set-text-speed! 2.0))  ; 4 - очень быстро
 	('KeyF	(pk "F key pressed, calling toggle-fullscreen-stage") (toggle-fullscreen-stage)) ; F - переключить полноэкранный режим
 	('F11	(pk "F11 key pressed, calling toggle-fullscreen-stage") (toggle-fullscreen-stage)) ; F11 - переключить полноэкранный режим
+	('ShiftF11 (begin ; Shift+F11 - переключить автоматический полноэкранный режим
+		     (set-fullscreen-preference! (not (get-fullscreen-preference)))
+		     (pk "Fullscreen preference toggled to:" (get-fullscreen-preference))))
 	(_ #t)))))
