@@ -28,12 +28,15 @@
 	 text* sprites* music* carret* ttl*)
       ($ <scene> state  bg  old-text
 	 text  sprites  music  carret  ttl))
+     ;; Если обе сцены не имеют музыки, но что-то играет - останавливаем
+     (when (and (not music) (not music*) (get-current-audio))
+       (stop-current-music!))
      (cond
       ((not (equal? (and music (music-path music))
                     (and music* (music-path music*))))
        (cond
         ((and (music? music)
-              (not music*))
+              (or (not music*) (not (music? music*))))
          (stop-current-music!)
          (scene-update-music current music*))
 

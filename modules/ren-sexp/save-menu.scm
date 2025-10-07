@@ -12,7 +12,8 @@
             navigate-save-menu
             select-save-menu-item
             get-save-menu-items
-            init-save-menu))
+            init-save-menu
+            format-timestamp))
 
 ;; Состояние меню сохранений
 (define-record-type <save-menu-state>
@@ -24,13 +25,35 @@
 ;; Глобальное состояние меню сохранений
 (define *save-menu-state* (make-save-menu-state 'load 0))
 
+;; Функция для форматирования времени (простое отображение unix timestamp)
+(define (format-timestamp timestamp)
+  (if timestamp
+      (let* ((total-seconds timestamp)
+             (days (quotient total-seconds 86400))
+             (remaining-seconds (remainder total-seconds 86400))
+             (hours (quotient remaining-seconds 3600))
+             (remaining-seconds (remainder remaining-seconds 3600))
+             (minutes (quotient remaining-seconds 60)))
+        (string-append 
+          "Day " (number->string days) " "
+          (if (< hours 10) "0" "") (number->string hours) ":"
+          (if (< minutes 10) "0" "") (number->string minutes)))
+      ""))
+
 ;; Инициализация меню сохранений с указанием типа
 (define (init-save-menu menu-type)
   (set! *save-menu-state* (make-save-menu-state menu-type 0)))
 
 ;; Получить элементы меню сохранений
 (define (get-save-menu-items menu-type)
-  (let ((slots (get-save-slots)))
+  (let* ((slots (get-save-slots))
+         ;; Найти самый свежий timestamp среди существующих сейвов
+         (timestamps (map (lambda (slot-info)
+                            (if (assoc-ref slot-info 'exists)
+                                (assoc-ref slot-info 'timestamp)
+                                0))
+                          slots))
+         (latest-timestamp (apply max (cons 0 timestamps))))
     (append
       (map (lambda (slot-info)
              (let ((slot (assoc-ref slot-info 'slot))
@@ -38,11 +61,16 @@
                    (compatible (assoc-ref slot-info 'compatible))
                    (timestamp (assoc-ref slot-info 'timestamp)))
                (if exists
-                   (list (string-append "Slot " (number->string slot) 
-                                        (if compatible "" " [INCOMPATIBLE]"))
-                         slot
-                         exists
-                         compatible)
+                   (let* ((time-str (format-timestamp timestamp))
+                          (is-latest (= timestamp latest-timestamp))
+                          (slot-text (string-append "Slot " (number->string slot) 
+                                                   (if compatible "" " [INCOMPATIBLE]")
+                                                   " - " time-str))
+                          ;; Выделяем самый свежий сейв жирным шрифтом
+                          (display-text (if is-latest
+                                            (string-append "**" slot-text "**")
+                                            slot-text)))
+                     (list display-text slot exists compatible))
                    (list (string-append "Slot " (number->string slot) ": Empty")
                          slot
                          exists
